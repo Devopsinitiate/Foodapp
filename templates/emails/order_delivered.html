@@ -1,0 +1,50 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #16a34a;">✅ Order Delivered Successfully!</h2>
+
+<p>Hi {{ order.user.first_name|default:order.user.username }},</p>
+
+<p>Your order from <strong>{{ order.restaurant.name }}</strong> has been delivered! We hope you enjoy your meal! 🎉</p>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #16a34a;">Order #{{ order.order_number }}</h3>
+
+    <div style="background-color: #dcfce7; padding: 15px; border-radius: 6px; margin: 15px 0; text-align: center;">
+        <p style="font-size: 20px; margin: 0;">✅</p>
+        <p style="font-size: 16px; font-weight: bold; color: #16a34a; margin: 5px 0;">
+            Delivered
+        </p>
+        <p style="font-size: 14px; color: #666; margin: 0;">
+            {{ order.delivered_at|date:"F d, Y at g:i A" }}
+        </p>
+    </div>
+
+    <p><strong>Total:</strong> ${{ order.total }}</p>
+
+    {% if order.payment_status == 'cod' %}
+    <p style="background-color: #fef3c7; padding: 10px; border-radius: 4px;">
+        💵 <strong>Cash on Delivery:</strong> Payment collected
+    </p>
+    {% endif %}
+</div>
+
+<div style="background-color: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #0369a1;">How was your experience?</h3>
+    <p>We'd love to hear your feedback! Your review helps us improve and helps other customers make informed choices.
+    </p>
+
+    <p style="text-align: center; margin-top: 20px;">
+        <a href="{{ site_url }}/restaurants/{{ order.restaurant.slug }}/#reviews" class="button">Leave a Review</a>
+    </p>
+</div>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}/orders/order/{{ order.order_number }}/" style="color: #F97316; text-decoration: none;">View
+        Order Details →</a>
+</p>
+
+<p style="margin-top: 30px; text-align: center; color: #666;">
+    Thank you for choosing EmpressDish! 🍽️
+</p>
+{% endblock %}

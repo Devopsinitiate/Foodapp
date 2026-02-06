@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Management - Vendor Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Order Management</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Manage and track your orders</p>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-2 mb-6 flex gap-2 overflow-x-auto">
+            <a href="{% url 'vendors:order_dashboard' %}"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if not current_status %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                All Orders
+            </a>
+            <a href="?status=pending"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if current_status == 'pending' %}bg-yellow-500 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                Pending ({{ status_counts.pending }})
+            </a>
+            <a href="?status=confirmed"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if current_status == 'confirmed' %}bg-blue-500 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                Confirmed ({{ status_counts.confirmed }})
+            </a>
+            <a href="?status=preparing"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if current_status == 'preparing' %}bg-purple-500 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                Preparing ({{ status_counts.preparing }})
+            </a>
+            <a href="?status=ready"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if current_status == 'ready' %}bg-green-500 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                Ready ({{ status_counts.ready }})
+            </a>
+            <a href="?status=out_for_delivery"
+                class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap {% if current_status == 'out_for_delivery' %}bg-indigo-500 text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                Out for Delivery ({{ status_counts.out_for_delivery }})
+            </a>
+        </div>
+
+        <!-- Orders List -->
+        <div class="space-y-4">
+            {% for order in orders %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <a href="{% url 'vendors:order_detail' order.order_number %}"
+                            class="text-xl font-bold text-primary hover:underline">
+                            #{{ order.order_number }}
+                        </a>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {{ order.restaurant.name }} • {{ order.created_at|date:"M d, Y H:i" }}
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full
+                            {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400
+                            {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400
+                            {% elif order.status == 'preparing' %}bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400
+                            {% elif order.status == 'ready' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                            {% elif order.status == 'delivered' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                            {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                    {% if order.delivery_type == 'pickup' %}
+                    <span
+                        class="px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 ml-2">
+                        <span class="material-symbols-outlined align-middle !text-sm">shopping_bag</span> Pickup
+                    </span>
+                    {% else %}
+                    <span
+                        class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 ml-2">
+                        <span class="material-symbols-outlined align-middle !text-sm">local_shipping</span> Delivery
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Customer</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ order.user.username }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Items</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ order.items.count }} items</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
+                        <p class="font-medium text-gray-900 dark:text-white">₦{{ order.total|floatformat:0 }}</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Payment Method</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ order.get_payment_method_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Payment Status</p>
+                        <span
+                            class="inline-block px-2 py-1 text-xs font-semibold rounded-full
+                            {% if order.payment_status == 'paid' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                            {% elif order.payment_status == 'cod' %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400
+                            {% elif order.payment_status == 'failed' %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                            {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <a href="{% url 'vendors:order_detail' order.order_number %}"
+                        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        View Details
+                    </a>
+                    {% if order.status == 'pending' %}
+                    <form method="post" action="{% url 'vendors:order_update_status' order.order_number %}"
+                        class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="confirmed">
+                        <button type="submit"
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Accept Order
+                        </button>
+                    </form>
+                    {% elif order.status == 'confirmed' %}
+                    <form method="post" action="{% url 'vendors:order_update_status' order.order_number %}"
+                        class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="preparing">
+                        <button type="submit"
+                            class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Start Preparing
+                        </button>
+                    </form>
+                    {% elif order.status == 'preparing' %}
+                    <form method="post" action="{% url 'vendors:order_update_status' order.order_number %}"
+                        class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="ready">
+                        <button type="submit"
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Mark as Ready
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-12 text-center">
+                <div
+                    class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="material-symbols-outlined text-gray-400 text-5xl">shopping_bag</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Orders Found</h3>
+                <p class="text-gray-600 dark:text-gray-400">Orders will appear here when customers place them</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // WebSocket connection for vendor notifications
+    const vendorWs = new WebSocketManager('/ws/vendor/notifications/');
+
+    vendorWs.on('connected', (data) => {
+        console.log('✓ Connected to vendor notifications');
+    });
+
+    vendorWs.on('new_order', (data) => {
+        console.log('New order notification:', data);
+
+        if (window.Toast) {
+            Toast.success(`New Order #${data.order_number} received!`);
+        }
+
+        // Play notification sound
+        try {
+            const audio = new Audio('/static/sounds/notification.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        } catch (e) { }
+
+        // Reload page after 2 seconds to show new order
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    });
+
+    vendorWs.on('order_status_update', (data) => {
+        console.log('Order status update:', data);
+
+        if (window.Toast) {
+            Toast.info(`Order updated to ${data.status}`);
+        }
+
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+    });
+
+    vendorWs.on('order_cancelled', (data) => {
+        console.log('Order cancelled:', data);
+        if (window.Toast) {
+            Toast.error(`Order was cancelled!`);
+        }
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+    });
+
+    vendorWs.connect();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        vendorWs.close();
+    });
+</script>
+{% endblock %}

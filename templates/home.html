@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}EmpressDish - Your favorite food, delivered{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative">
+    <div class="container mx-auto px-4 py-16 sm:py-24">
+        <div class="flex min-h-[480px] flex-col gap-6 items-center justify-center rounded-xl bg-cover bg-center bg-no-repeat p-8 text-center"
+            style='background-image: linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200");'>
+            <div class="flex flex-col gap-4">
+                <h1 class="text-white text-4xl font-black leading-tight tracking-tighter md:text-6xl">Your favorite
+                    food, delivered.</h1>
+                <h2 class="text-gray-200 text-lg font-normal leading-normal md:text-xl">Discover top-rated restaurants
+                    near you.</h2>
+            </div>
+
+            <div class="w-full max-w-2xl mt-4">
+                <form action="{% url 'restaurants:list' %}" method="get"
+                    class="flex w-full flex-1 items-stretch rounded-xl h-16 bg-white dark:bg-gray-900 shadow-lg">
+                    <div class="text-gray-500 dark:text-gray-400 flex items-center justify-center pl-5">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input name="search"
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-0 bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal"
+                        placeholder="Search for restaurants, cuisines, or dishes" value="{{ request.GET.search }}" />
+                    <div class="flex items-center justify-center pr-2">
+                        <button type="submit"
+                            class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold hover:bg-primary/90 transition-colors">
+                            <span class="truncate">Search</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Restaurants Section -->
+<section class="container mx-auto px-4 py-8">
+    <!-- Section Header -->
+    <h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight px-4 pb-4 pt-5">Featured
+        Restaurants</h2>
+
+    <!-- Category Chips -->
+    <div class="flex gap-3 p-4 overflow-x-auto">
+        <a href="{% url 'restaurants:list' %}"
+            class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 {% if not request.GET.category %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %} transition-colors">
+            <p class="text-sm font-medium">All</p>
+        </a>
+        {% for category in categories %}
+        <a href="{% url 'restaurants:list' %}?category={{ category.slug }}"
+            class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 {% if request.GET.category == category.slug %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %} transition-colors">
+            <p class="text-sm font-medium">{{ category.name }}</p>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Restaurant Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+        {% for restaurant in restaurants %}
+        <a href="{% url 'restaurants:detail' restaurant.slug %}" class="flex flex-col gap-3 group">
+            <div class="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-xl overflow-hidden transform transition-transform duration-300 group-hover:scale-105"
+                style='background-image: url("{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600{% endif %}");'>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-gray-900 dark:text-white text-lg font-bold leading-normal">{{ restaurant.name }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">{{ restaurant.cuisine_type }}</p>
+                <div class="flex items-center mt-1 text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                    <span class="material-symbols-outlined text-primary !text-[18px]">star</span>
+                    <span class="ml-1">{{ restaurant.average_rating|floatformat:1 }} • {{ restaurant.estimated_delivery_time }}-{{ restaurant.estimated_delivery_time|add:10 }} min</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <p class="text-gray-500 dark:text-gray-400 text-lg">No restaurants found. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if restaurants %}
+    <div class="flex justify-center mt-8">
+        <a href="{% url 'restaurants:list' %}"
+            class="flex items-center justify-center gap-2 rounded-xl bg-primary px-8 h-14 text-base font-bold text-white hover:bg-primary/90 transition-colors">
+            <span>View All Restaurants</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Popular Dishes Section -->
+{% if popular_dishes %}
+<section class="container mx-auto px-4 py-16 bg-gray-50 dark:bg-gray-900/50">
+    <h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight text-center mb-4">Trending
+        This Week</h2>
+    <p class="text-gray-600 dark:text-gray-400 text-center mb-12">Popular dishes across all restaurants</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for dish in popular_dishes %}
+        <div
+            class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+            <div class="relative aspect-square bg-cover bg-center overflow-hidden"
+                style='background-image: url("{% if dish.image %}{{ dish.image.url }}{% else %}https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400{% endif %}");'>
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-1">{{ dish.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ dish.restaurant.name }}</p>
+                <div class="flex items-center justify-between mt-3">
+                    <span class="text-lg font-black text-primary">${{ dish.current_price }}</span>
+                    <a href="{% url 'restaurants:detail' dish.restaurant.slug %}"
+                        class="text-sm text-primary hover:underline">View Menu →</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Stats Section -->
+<section class="container mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="flex flex-col items-center">
+            <div class="text-5xl font-black text-primary mb-2">{{ stats.restaurant_count }}+</div>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">Partner Restaurants</p>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="text-5xl font-black text-primary mb-2">{{ stats.total_orders|default:"50,000" }}+</div>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">Orders Delivered</p>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="text-5xl font-black text-primary mb-2">{{ stats.avg_rating|floatformat:1 }}★</div>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">Average Rating</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="container mx-auto px-4 py-16">
+    <h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight text-center mb-12">How It
+        Works</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-primary text-4xl">restaurant_menu</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Choose Your Meal</h3>
+            <p class="text-gray-600 dark:text-gray-400">Browse menus from top-rated restaurants in your area</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center">
+            <div class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-primary text-4xl">shopping_cart</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Place Your Order</h3>
+            <p class="text-gray-600 dark:text-gray-400">Add items to cart and checkout securely with Paystack</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center">
+            <div class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-primary text-4xl">delivery_dining</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Fast Delivery</h3>
+            <p class="text-gray-600 dark:text-gray-400">Track your order in real-time and enjoy your meal</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

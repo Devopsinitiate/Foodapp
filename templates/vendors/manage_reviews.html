@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Reviews - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Customer Reviews</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage feedback from your customers</p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
+                <a href="?filter=all" class="px-4 py-2 rounded-md text-sm font-medium {% if filter_status == 'all' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition-all">All</a>
+                <a href="?filter=pending_response" class="px-4 py-2 rounded-md text-sm font-medium {% if filter_status == 'pending_response' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition-all">Pending Response</a>
+                <a href="?filter=responded" class="px-4 py-2 rounded-md text-sm font-medium {% if filter_status == 'responded' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition-all">Responded</a>
+            </div>
+        </div>
+
+        {% if reviews %}
+        <div class="space-y-6">
+            {% for review in reviews %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <!-- Left Side: User and Rating -->
+                        <div class="md:w-64 flex-shrink-0">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                    {{ review.user.username|first|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900 dark:text-white">{{ review.user.get_full_name|default:review.user.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ review.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-1 text-primary mb-2">
+                                {% for i in "12345" %}
+                                <span class="material-symbols-outlined !text-base" style="{% if forloop.counter <= review.rating %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ review.restaurant.name }}
+                            </p>
+                            <p class="text-xs text-gray-500">Order #{{ review.order.order_number }}</p>
+                        </div>
+                        
+                        <!-- Right Side: Comment and Action -->
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div>
+                                <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 italic">
+                                    "{{ review.comment }}"
+                                </p>
+                                
+                                {% if review.vendor_response %}
+                                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border-l-4 border-primary mt-2">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="material-symbols-outlined text-primary !text-sm">reply</span>
+                                        <p class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Your Response</p>
+                                        <span class="text-[10px] text-gray-500">{{ review.vendor_response_date|date:"M d, Y" }}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ review.vendor_response }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if not review.vendor_response %}
+                            <div class="mt-4 flex justify-end">
+                                <a href="{% url 'vendors:respond_to_review' review.id %}" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                                    <span class="material-symbols-outlined !text-sm">reply</span>
+                                    Respond to Review
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="mt-4 flex justify-end">
+                                <a href="{% url 'vendors:respond_to_review' review.id %}" class="text-primary hover:text-primary-dark text-sm font-semibold flex items-center gap-2">
+                                    <span class="material-symbols-outlined !text-sm">edit</span>
+                                    Edit Response
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if reviews.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex gap-2">
+                {% if reviews.has_previous %}
+                <a href="?page={{ reviews.previous_page_number }}&filter={{ filter_status }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                <span class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold shadow-md shadow-primary/20">
+                    {{ reviews.number }}
+                </span>
+                
+                {% if reviews.has_next %}
+                <a href="?page={{ reviews.next_page_number }}&filter={{ filter_status }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-gray-400 text-4xl">rate_review</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Reviews Found</h2>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if filter_status == 'all' %}
+                You haven't received any reviews yet.
+                {% elif filter_status == 'pending_response' %}
+                You've responded to all your reviews! Great job.
+                {% else %}
+                You haven't responded to any reviews yet.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

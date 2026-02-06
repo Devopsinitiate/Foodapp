@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurants - EmpressDish{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex flex-col gap-4 mb-8">
+        <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Browse Restaurants</h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg">Discover amazing food from top-rated restaurants</p>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
+        <form method="get" action="{% url 'restaurants:list' %}" class="flex flex-col md:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <div class="flex w-full items-stretch rounded-lg h-12 bg-gray-100 dark:bg-gray-800">
+                    <div class="text-gray-500 dark:text-gray-400 flex items-center justify-center pl-4">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-0 bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal" placeholder="Search restaurants or cuisines" value="{{ search_query }}"/>
+                </div>
+            </div>
+            
+            <!-- Sort Dropdown -->
+            <select name="sort" class="form-select rounded-lg border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white h-12 px-4">
+                <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
+                <option value="delivery_time" {% if sort_by == 'delivery_time' %}selected{% endif %}>Fastest Delivery</option>
+                <option value="delivery_fee" {% if sort_by == 'delivery_fee' %}selected{% endif %}>Lowest Delivery Fee</option>
+                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
+            </select>
+            
+            <!-- Search Button -->
+            <button type="submit" class="flex items-center justify-center rounded-lg h-12 px-6 bg-primary text-white text-base font-bold hover:bg-primary/90 transition-colors">
+                <span>Apply</span>
+            </button>
+        </form>
+    </div>
+    
+    <!-- Category Chips -->
+    <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
+        <a href="{% url 'restaurants:list' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 {% if not selected_category %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %} transition-colors">
+            <p class="text-sm font-medium">All</p>
+        </a>
+        {% for category in categories %}
+        <a href="{% url 'restaurants:list' %}?category={{ category.slug }}{% if search_query %}&search={{ search_query }}{% endif %}" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 {% if selected_category == category.slug %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %} transition-colors">
+            <p class="text-sm font-medium">{{ category.name }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Restaurant Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for restaurant in restaurants %}
+        <div class="flex flex-col gap-3 group relative">
+            <a href="{% url 'restaurants:detail' restaurant.slug %}" class="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-xl overflow-hidden transform transition-transform duration-300 group-hover:scale-105 relative" style='background-image: url("{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600{% endif %}");'>
+                {% if not restaurant.is_accepting_orders %}
+                <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">Closed</span>
+                </div>
+                {% endif %}
+            </a>
+            {% if user.is_authenticated %}
+            <button onclick="toggleFavorite(event, {{ restaurant.id }})" class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-lg favorite-btn" data-restaurant-id="{{ restaurant.id }}">
+                <span class="material-symbols-outlined {% if restaurant in user.favorite_restaurants.all %}text-red-500{% else %}text-gray-400{% endif %} favorite-icon" style="{% if restaurant in user.favorite_restaurants.all %}font-variation-settings: 'FILL' 1;{% endif %}">favorite</span>
+            </button>
+            {% endif %}
+            <a href="{% url 'restaurants:detail' restaurant.slug %}" class="flex flex-col">
+                <p class="text-gray-900 dark:text-white text-lg font-bold leading-normal">{{ restaurant.name }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">{{ restaurant.cuisine_type }}</p>
+                <div class="flex items-center mt-1 text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                    <span class="material-symbols-outlined text-primary !text-[18px]">star</span>
+                    <span class="ml-1">{{ restaurant.average_rating|floatformat:1 }} • {{ restaurant.estimated_delivery_time }}-{{ restaurant.estimated_delivery_time|add:10 }} min</span>
+                </div>
+                {% if restaurant.delivery_fee > 0 %}
+                <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Delivery: ${{ restaurant.delivery_fee }}</p>
+                {% else %}
+                <p class="text-primary text-xs mt-1 font-semibold">Free Delivery</p>
+                {% endif %}
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16">
+            <span class="material-symbols-outlined text-gray-400 text-6xl mb-4">restaurant</span>
+            <p class="text-gray-500 dark:text-gray-400 text-lg">No restaurants found</p>
+            <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your search or filters</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if restaurants.has_other_pages %}
+    <div class="flex justify-center mt-12">
+        <nav class="flex items-center gap-2">
+            {% if restaurants.has_previous %}
+            <a href="?page={{ restaurants.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </a>
+            {% endif %}
+            
+            {% for num in restaurants.paginator.page_range %}
+                {% if restaurants.number == num %}
+                <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-white font-bold">{{ num }}</span>
+                {% elif num > restaurants.number|add:'-3' and num < restaurants.number|add:'3' %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if restaurants.has_next %}
+            <a href="?page={{ restaurants.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</section>
+
+<script>
+function toggleFavorite(event, restaurantId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const button = event.currentTarget;
+    const icon = button.querySelector('.favorite-icon');
+    
+    fetch(`/restaurants/${restaurantId}/toggle-favorite/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Toggle heart icon
+            if (data.is_favorite) {
+                icon.classList.add('text-red-500');
+                icon.classList.remove('text-gray-400');
+                icon.style.fontVariationSettings = "'FILL' 1";
+            } else {
+                icon.classList.remove('text-red-500');
+                icon.classList.add('text-gray-400');
+                icon.style.fontVariationSettings = "'FILL' 0";
+            }
+            
+            // Add animation
+            button.classList.add('scale-125');
+            setTimeout(() => button.classList.remove('scale-125'), 200);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update favorite. Please try again.');
+    });
+}
+</script>
+{% endblock %}

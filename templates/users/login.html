@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EmpressDish</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#F97316",
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#1a1a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-[#343A40] dark:text-gray-200">
+    <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <header
+                class="flex items-center justify-center whitespace-nowrap border-b border-solid border-b-gray-200 dark:border-b-gray-700 px-4 sm:px-10 py-4">
+                <div class="flex items-center gap-4 text-[#343A40] dark:text-gray-200">
+                    <div class="size-6 text-primary">
+                        <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16.5 10.5C16.5 8.57 14.93 7 13 7H12V2.5C12 2.22 11.78 2 11.5 2C11.22 2 11 2.22 11 2.5V7H10C8.07 7 6.5 8.57 6.5 10.5V17H16.5V10.5ZM17 20.5H6C5.72 20.5 5.5 20.28 5.5 20V19C5.5 18.72 5.72 18.5 6 18.5H17C17.28 18.5 17.5 18.72 17.5 19V20C17.5 20.28 17.28 20.5 17 20.5Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold leading-tight tracking-[-0.015em]">
+                        <a href="{% url 'home' %}">EmpressDish</a>
+                    </h1>
+                    <div class="size-6 text-primary">
+                        <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16.5 10.5C16.5 8.57 14.93 7 13 7H12V2.5C12 2.22 11.78 2 11.5 2C11.22 2 11 2.22 11 2.5V7H10C8.07 7 6.5 8.57 6.5 10.5V17H16.5V10.5ZM17 20.5H6C5.72 20.5 5.5 20.28 5.5 20V19C5.5 18.72 5.72 18.5 6 18.5H17C17.28 18.5 17.5 18.72 17.5 19V20C17.5 20.28 17.28 20.5 17 20.5Z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex flex-1 items-center justify-center py-10 px-4">
+                <div class="layout-content-container flex w-full max-w-md flex-col items-center">
+                    <div class="w-full rounded-xl bg-white dark:bg-gray-800 p-8 shadow-md">
+                        <h2
+                            class="text-[#343A40] dark:text-white tracking-light text-[32px] font-bold leading-tight text-center pb-6">
+                            Welcome Back</h2>
+
+                        {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                            <div
+                                class="rounded-lg p-3 mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-800{% elif message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'users:login' %}" class="flex flex-col gap-4">
+                            {% csrf_token %}
+
+                            <label class="flex flex-col">
+                                <p class="text-[#343A40] dark:text-gray-200 text-base font-medium leading-normal pb-2">
+                                    Email / Username</p>
+                                <div class="relative flex items-center">
+                                    <span class="material-symbols-outlined absolute left-3 text-[#6C757D]">mail</span>
+                                    <input name="username"
+                                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#343A40] dark:text-white bg-background-light dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-0 focus:ring-2 focus:ring-primary/50 focus:border-primary h-14 placeholder:text-[#6C757D] pl-10 pr-4 text-base font-normal leading-normal"
+                                        placeholder="Email or Username" type="text" required />
+                                </div>
+                            </label>
+
+                            <label class="flex flex-col">
+                                <p class="text-[#343A40] dark:text-gray-200 text-base font-medium leading-normal pb-2">
+                                    Password</p>
+                                <div class="relative flex items-center">
+                                    <span class="material-symbols-outlined absolute left-3 text-[#6C757D]">lock</span>
+                                    <input name="password"
+                                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#343A40] dark:text-white bg-background-light dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-0 focus:ring-2 focus:ring-primary/50 focus:border-primary h-14 placeholder:text-[#6C757D] pl-10 pr-10 text-base font-normal leading-normal"
+                                        placeholder="Password" type="password" required />
+                                    <button class="absolute right-3 text-[#6C757D]" type="button"
+                                        onclick="togglePassword(this)">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                    </button>
+                                </div>
+                            </label>
+
+                            <div class="flex justify-end">
+                                <p
+                                    class="text-primary text-sm font-medium leading-normal underline cursor-pointer hover:text-primary/80">
+                                    Forgot Password?</p>
+                            </div>
+
+                            <button
+                                class="flex w-full items-center justify-center rounded-lg bg-primary h-14 text-white text-lg font-bold leading-normal transition-colors hover:bg-primary/90 mt-2"
+                                type="submit">Log In</button>
+                        </form>
+
+                        <p class="text-center text-sm font-normal text-[#6C757D] pt-8">Don't have an account? <a
+                                class="font-medium text-primary underline hover:text-primary/80"
+                                href="{% url 'users:register' %}">Sign Up</a></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(button) {
+            const input = button.parentElement.querySelector('input');
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+    </script>
+</body>
+
+</html>

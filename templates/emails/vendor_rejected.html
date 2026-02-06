@@ -1,0 +1,36 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Vendor Application Update{% endblock %}
+
+{% block content %}
+<h2>Update on Your Vendor Application</h2>
+
+<p>Hi {{ vendor.first_name|default:vendor.username }},</p>
+
+<p>Thank you for your interest in becoming a vendor on EmpressDish.</p>
+
+<p>After careful review, we're unable to approve your application for <strong>{{ business_name }}</strong> at this time.</p>
+
+{% if reason %}
+<div class="info-box">
+    <p style="margin: 0;"><strong>Reason:</strong><br>{{ reason }}</p>
+</div>
+{% endif %}
+
+<p>This doesn't mean you can't apply again in the future. Here's what you can do:</p>
+<ul style="color: #4b5563; line-height: 1.8;">
+    <li>📋 Review our vendor requirements</li>
+    <li>📝 Address the concerns mentioned above</li>
+    <li>🔄 Reapply when you're ready</li>
+    <li>📞 Contact our support team for clarification</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="mailto:vendors@empressdish.com" class="button">Contact Vendor Support</a>
+</div>
+
+<p>We appreciate your interest in partnering with EmpressDish and hope to work with you in the future.</p>
+
+<p>Best regards,<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

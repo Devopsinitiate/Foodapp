@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Empress Dish - Create Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7C3AED", // Regal purple from request
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#111827", // Dark equivalent
+                        "container-light": "#FFFFFF",
+                        "container-dark": "#1F2937",
+                        "text-light": "#1F2937",
+                        "text-dark": "#F9FAFB",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                        "border-light": "#E5E7EB",
+                        "border-dark": "#374151",
+                        "error": "#EF4444"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6">
+<header class="absolute top-0 flex w-full items-center justify-center gap-4 py-8">
+<span class="material-symbols-outlined text-primary text-3xl">restaurant_menu</span>
+<h1 class="text-2xl font-bold tracking-tight text-text-light dark:text-text-dark">Empress Dish</h1>
+<span class="material-symbols-outlined text-primary text-3xl">restaurant</span>
+</header>
+<main class="w-full max-w-md">
+<div class="flex flex-col rounded-xl bg-container-light dark:bg-container-dark shadow-sm border border-border-light dark:border-border-dark">
+<div class="p-8 text-center">
+<h2 class="text-3xl font-black tracking-tighter text-text-light dark:text-text-dark">Create Your Account</h2>
+<p class="mt-2 text-text-muted-light dark:text-text-muted-dark">Get your favorite meals delivered in minutes.</p>
+</div>
+<div class="px-8 pb-8">
+<form class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium" for="full-name">Full Name</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark focus:border-primary focus:ring-primary h-12 text-base" id="full-name" placeholder="Enter your full name" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium" for="email">Email Address</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark focus:border-primary focus:ring-primary h-12 text-base" id="email" placeholder="Enter your email" type="email"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium" for="password">Password</label>
+<div class="relative">
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark focus:border-primary focus:ring-primary h-12 text-base" id="password" placeholder="8+ characters" type="password"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 text-text-muted-light dark:text-text-muted-dark">
+<span class="material-symbols-outlined">visibility_off</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium" for="confirm-password">Confirm Password</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark focus:border-primary focus:ring-primary h-12 text-base" id="confirm-password" placeholder="Re-enter your password" type="password"/>
+</div>
+<div class="flex items-center gap-3 pt-2">
+<input class="form-checkbox h-5 w-5 rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-primary focus:ring-primary focus:ring-offset-container-light dark:focus:ring-offset-container-dark" id="terms" type="checkbox"/>
+<label class="text-sm text-text-muted-light dark:text-text-muted-dark" for="terms">I agree to the <a class="font-medium text-primary hover:underline" href="#">Terms of Service</a> &amp; <a class="font-medium text-primary hover:underline" href="#">Privacy Policy</a>.</label>
+</div>
+<button class="mt-4 w-full rounded-lg bg-primary py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-container-dark" type="submit">Create Account</button>
+</form>
+</div>
+</div>
+<p class="mt-8 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
+                Already have an account? <a class="font-medium text-primary hover:underline" href="#">Log In</a>
+</p>
+</main>
+</div>
+</body></html>

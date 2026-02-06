@@ -1,0 +1,49 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #F97316;">🚗 Driver Assigned to Your Order!</h2>
+
+<p>Hi {{ order.user.first_name|default:order.user.username }},</p>
+
+<p>Good news! A driver has been assigned to deliver your order from <strong>{{ order.restaurant.name }}</strong>.</p>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #F97316;">Order #{{ order.order_number }}</h3>
+
+    {% if delivery.driver %}
+    <div style="background-color: #e0f2fe; padding: 15px; border-radius: 6px; margin: 15px 0;">
+        <h4 style="margin-top: 0; color: #0369a1;">Your Driver</h4>
+        <p style="margin: 5px 0;"><strong>{{ delivery.driver.get_full_name }}</strong></p>
+        {% if delivery.driver.phone_number %}
+        <p style="margin: 5px 0;">📞 {{ delivery.driver.phone_number }}</p>
+        {% endif %}
+        {% if delivery.driver.vehicle_info %}
+        <p style="margin: 5px 0;">🚗 {{ delivery.driver.vehicle_info }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <p><strong>Total:</strong> ${{ order.total }}</p>
+    <p><strong>Payment:</strong>
+        {% if order.payment_status == 'paid' %}
+        💳 Already Paid
+        {% elif order.payment_status == 'cod' %}
+        💵 Pay cash on delivery
+        {% endif %}
+    </p>
+
+    <p style="margin-top: 15px;"><strong>Delivery Address:</strong><br>
+        {{ order.delivery_address }}<br>
+        {{ order.delivery_city }}, {{ order.delivery_state }}</p>
+</div>
+
+<p style="color: #666; font-size: 14px;">
+    ⏱️ Estimated arrival: {{ delivery.estimated_delivery_time|default:"20-30" }} minutes
+</p>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}/orders/order/{{ order.order_number }}/track/" class="button">Track Live Location</a>
+</p>
+
+<p style="margin-top: 20px; color: #666;">We'll notify you when your driver is nearby!</p>
+{% endblock %}

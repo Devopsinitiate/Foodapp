@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Order #{{ order.order_number }} - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Page Heading -->
+    <div class="flex flex-wrap justify-between gap-4 p-4 mb-6">
+        <div class="flex min-w-72 flex-col gap-2">
+            <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Your order
+                is on its way!</h1>
+            <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                {% if order.delivery_type == 'pickup' %}
+                Follow your order status and head to the restaurant when it's ready.
+                {% else %}
+                Track your delivery in real-time below.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column: Map & ETA -->
+        <div class="lg:col-span-2">
+            <div class="flex flex-col gap-6">
+                <!-- Map Placeholder -->
+                <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl object-cover shadow-lg"
+                    style='background-image: url("https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200");'>
+                    <div class="w-full h-full bg-black/20 rounded-xl flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <span class="material-symbols-outlined text-6xl mb-2">location_on</span>
+                            <p class="text-lg font-semibold">Live tracking map</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETA Card -->
+                <div
+                    class="rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg border border-gray-200 dark:border-gray-800">
+                    <div class="flex items-stretch justify-between gap-4">
+                        <div class="flex flex-col gap-1 flex-1">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-normal">Estimated
+                                Time of Arrival</p>
+                            <p class="text-primary text-3xl font-bold leading-tight">
+                                {% if order.status == 'delivered' %}
+                                {% if order.delivery_type == 'pickup' %}Picked up!{% else %}Delivered!{% endif %}
+                                {% elif order.status == 'ready' and order.delivery_type == 'pickup' %}
+                                Ready for Pickup!
+                                {% else %}
+                                {% if order.delivery_type == 'pickup' %}Estimated ready in{% else %}Arriving in{% endif %} {{ order.estimated_delivery_time|timeuntil }}
+                                {% endif %}
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                                Order #{{ order.order_number }}
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-20 h-20"
+                                style='background-image: url("{% if order.restaurant.logo %}{{ order.restaurant.logo.url }}{% else %}https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200{% endif %}");'>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Details & Timeline -->
+        <div class="lg:col-span-1">
+            <div
+                class="rounded-xl bg-white dark:bg-gray-900 p-6 space-y-8 shadow-lg border border-gray-200 dark:border-gray-800">
+                <!-- Driver Information -->
+                {% if delivery and delivery.driver %}
+                <div class="flex items-center gap-4">
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-12 h-12"
+                        style='background-image: url("{% if delivery.driver.profile_picture %}{{ delivery.driver.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ delivery.driver.get_full_name|urlencode }}&background=F97316&color=fff{% endif %}");'>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-gray-900 dark:text-white font-bold">{{ delivery.driver.get_full_name }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Your delivery partner</p>
+                    </div>
+                    <a href="tel:{{ delivery.driver.phone_number }}"
+                        class="flex items-center justify-center rounded-full w-10 h-10 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary/20 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-xl">call</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Timeline -->
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Live Updates</h3>
+                    <div class="grid grid-cols-[32px_1fr] gap-x-4">
+                        <!-- Step 1: Confirmed -->
+                        <div class="flex flex-col items-center gap-1 pt-2.5">
+                            <div
+                                class="flex items-center justify-center w-8 h-8 rounded-full {% if order.status in 'confirmed,preparing,ready,out_for_delivery,delivered' %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400{% endif %}">
+                                <span class="material-symbols-outlined text-xl">check</span>
+                            </div>
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                        </div>
+                        <div class="flex flex-1 flex-col pb-6 pt-2">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Order
+                                confirmed</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                                {% if order.status in 'confirmed,preparing,ready,out_for_delivery,delivered' %}
+                                {{ order.confirmed_at|date:"g:i A" }}
+                                {% else %}
+                                Waiting for confirmation
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Step 2: Preparing -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                            <div
+                                class="flex items-center justify-center w-8 h-8 rounded-full {% if order.status in 'preparing,ready,out_for_delivery,delivered' %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400{% endif %}">
+                                <span class="material-symbols-outlined text-xl">restaurant</span>
+                            </div>
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                        </div>
+                        <div class="flex flex-1 flex-col py-6">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Preparing your
+                                meal</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                                {% if order.status in 'preparing,ready,out_for_delivery,delivered' %}
+                                In progress
+                                {% else %}
+                                Pending
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Step 3: Out for Delivery / Ready for Pickup -->
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                            <div
+                                class="flex items-center justify-center w-8 h-8 rounded-full {% if order.status in 'ready,out_for_delivery,delivered' %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400{% endif %}">
+                                <span class="material-symbols-outlined text-xl">{% if order.delivery_type == 'pickup' %}shopping_bag{% else %}electric_scooter{% endif %}</span>
+                            </div>
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                        </div>
+                        <div class="flex flex-1 flex-col py-6">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">
+                                {% if order.delivery_type == 'pickup' %}Ready for pickup{% else %}Out for delivery{% endif %}
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                                {% if order.status in 'ready,out_for_delivery,delivered' %}
+                                {% if order.status == 'ready' and order.delivery_type == 'pickup' %}Ready now{% else %}On the way{% endif %}
+                                {% else %}
+                                Pending
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Step 4: Delivered -->
+                        <div class="flex flex-col items-center gap-1 pb-2">
+                            <div class="w-0.5 bg-gray-200 dark:bg-gray-700 h-full"></div>
+                            <div
+                                class="flex items-center justify-center w-8 h-8 rounded-full {% if order.status == 'delivered' %}bg-primary text-white{% else %}bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400{% endif %} {% if order.status != 'delivered' %}animate-pulse{% endif %}">
+                                <span class="material-symbols-outlined text-xl">pin_drop</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-1 flex-col pt-6 pb-2">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">
+                                {% if order.status == 'delivered' %}
+                                {% if order.delivery_type == 'pickup' %}Picked up{% else %}Delivered{% endif %}
+                                {% else %}
+                                {% if order.delivery_type == 'pickup' %}Enjoy your meal!{% else %}Arriving soon{% endif %}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="border-t border-gray-200 dark:border-gray-800 pt-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+                    <div class="space-y-3 text-sm">
+                        {% for item in order.items.all %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">{{ item.quantity }}x {{ item.item_name }}</span>
+                            <span class="text-gray-800 dark:text-gray-200 font-medium">${{ item.total_price }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="border-t border-gray-200 dark:border-gray-800 mt-4 pt-4 flex justify-between font-bold">
+                        <span class="text-gray-900 dark:text-white">Total</span>
+                        <span class="text-gray-900 dark:text-white">${{ order.total }}</span>
+                    </div>
+                </div>
+
+                <!-- Support -->
+                <div class="border-t border-gray-200 dark:border-gray-800 pt-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Need Help?</h3>
+                    <div class="flex flex-col gap-3">
+                        <button
+                            class="w-full flex items-center justify-center gap-2 text-center px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-xl">help_outline</span>
+                            Help with Order
+                        </button>
+                        {% if order.can_be_cancelled %}
+                        <button onclick="cancelOrder()"
+                            class="w-full flex items-center justify-center gap-2 text-center px-4 py-2.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-bold hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                            <span class="material-symbols-outlined text-xl">cancel</span>
+                            Cancel Order
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="fixed top-20 right-4 z-50 flex flex-col gap-3 max-w-md">
+    <!-- Toasts will be inserted here dynamically -->
+</div>
+
+<script>
+    // WebSocket for real-time updates
+    const orderId = '{{ order.id }}';
+    let ws = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+
+    // Toast notification function
+    function showToast(message, status) {
+        const container = document.getElementById('toastContainer');
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'transform transition-all duration-500 ease-out translate-x-full opacity-0';
+
+        // Choose icon and color based on status
+        let icon = 'notifications';
+        let bgColor = 'bg-blue-500';
+        let textColor = 'text-blue-50';
+
+        if (status === 'accepted') {
+            icon = 'check_circle';
+            bgColor = 'bg-green-500';
+            textColor = 'text-green-50';
+        } else if (status === 'picked_up') {
+            icon = 'shopping_bag';
+            bgColor = 'bg-purple-500';
+            textColor = 'text-purple-50';
+        } else if (status === 'en_route') {
+            icon = 'local_shipping';
+            bgColor = 'bg-orange-500';
+            textColor = 'text-orange-50';
+        } else if (status === 'delivered') {
+            icon = 'done_all';
+            bgColor = 'bg-emerald-500';
+            textColor = 'text-emerald-50';
+        }
+
+        toast.innerHTML = `
+            <div class="${bgColor} ${textColor} rounded-xl shadow-2xl p-4 flex items-start gap-3 min-w-[320px] max-w-md border-2 border-white/20">
+                <span class="material-symbols-outlined text-3xl flex-shrink-0 animate-bounce">${icon}</span>
+                <div class="flex-1">
+                    <p class="font-bold text-base mb-1">Order Update</p>
+                    <p class="text-sm opacity-90">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+        }, 10);
+
+        // Play notification sound
+        playNotificationSound();
+
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.remove(), 500);
+        }, 8000);
+    }
+
+    // Notification sound
+    function playNotificationSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (e) {
+            // Silently fail if audio not available
+        }
+    }
+
+    function connectWebSocket() {
+        try {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/orders/${orderId}/`);
+
+            ws.onopen = function () {
+                console.log('✅ WebSocket connected - Real-time updates enabled');
+                reconnectAttempts = 0;
+            };
+
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                console.log('📦 Order update:', data);
+
+                // Show toast notification for delivery status updates
+                if (data.type === 'delivery_status' && data.message) {
+                    showToast(data.message, data.status);
+
+                    // Reload page after 5 seconds to update the visual timeline
+                    // This gives user time to see the toast
+                    clearTimeout(window.reloadTimer);
+                    window.reloadTimer = setTimeout(() => {
+                        location.reload();
+                    }, 5000);
+                }
+            };
+
+            ws.onerror = function (error) {
+                console.warn('⚠️ WebSocket error (real-time updates unavailable):', error);
+            };
+
+            ws.onclose = function (event) {
+                console.log('WebSocket closed. Falling back to manual refresh.');
+
+                // Try to reconnect a few times
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    console.log(`Reconnect attempt ${reconnectAttempts}/${maxReconnectAttempts}...`);
+                    setTimeout(connectWebSocket, 3000); // Faster reconnect
+                } else {
+                    console.log('💡 WebSocket unavailable. Switching to polling.');
+                    startPolling();
+                }
+            };
+        } catch (error) {
+            console.warn('⚠️ WebSocket not available. Using manual refresh mode.');
+        }
+    }
+
+    // Polling Fallback
+    function startPolling() {
+        // Only poll if not delivered
+        if ('{{ order.status }}' === 'delivered' || '{{ order.status }}' === 'cancelled') return;
+
+        console.log('🔄 Starting polling mode...');
+        setInterval(function () {
+            console.log('Checking status...');
+            location.reload();
+        }, 15000); // Refresh every 15 seconds
+    }
+
+    // Initial connection
+    connectWebSocket();
+
+    // Safety net: if no WS connection after 5 seconds, start polling
+    setTimeout(() => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            startPolling();
+        }
+    }, 5000);
+
+    function cancelOrder() {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+
+        const reason = prompt('Please provide a reason for cancellation:');
+        if (!reason) return;
+
+        fetch(`/api/orders/orders/{{ order.id }}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('Order cancelled successfully');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to cancel order');
+            });
+    }
+</script>
+{% endblock %}

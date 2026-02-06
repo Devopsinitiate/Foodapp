@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Driver Dashboard - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Driver Dashboard</h1>
+        <p class="text-gray-600 dark:text-gray-400">Welcome back, {{ user.first_name }}!</p>
+    </div>
+
+    <!-- Verification Status Alert -->
+    {% if not is_verified %}
+    <div class="mb-6 p-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 rounded-lg">
+        <div class="flex items-start">
+            <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 mr-3">warning</span>
+            <div>
+                <h3 class="font-bold text-yellow-800 dark:text-yellow-300 mb-1">Account Verification Pending</h3>
+                {% if not documents_uploaded %}
+                <p class="text-yellow-700 dark:text-yellow-400 text-sm">Please <a
+                        href="{% url 'delivery:upload_documents' %}" class="underline font-semibold">upload your
+                        documents</a> to complete verification.</p>
+                {% else %}
+                <p class="text-yellow-700 dark:text-yellow-400 text-sm">Your documents are under review. We'll notify
+                    you once approved!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Online Status -->
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <span class="material-symbols-outlined text-primary text-3xl">online_prediction</span>
+                <span
+                    class="text-xs font-semibold px-2 py-1 rounded-full {% if availability.is_online %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-700{% endif %}">
+                    {% if availability.is_online %}ONLINE{% else %}OFFLINE{% endif %}
+                </span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Status</p>
+            <form method="post" action="{% url 'delivery:toggle_availability' %}">
+                {% csrf_token %}
+                {% if availability.is_online %}
+                <button type="submit" name="action" value="go_offline"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm">
+                    Go Offline
+                </button>
+                {% else %}
+                <button type="submit" name="action" value="go_online"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm" {%
+                    if not is_verified %}disabled title="Complete verification first" {% endif %}>
+                    Go Online
+                </button>
+            </form>
+        </div>
+
+        <!-- Today's Deliveries -->
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            <span class="material-symbols-outlined text-primary text-3xl mb-4">local_shipping</span>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Today's Deliveries</p>
+            <p class="text-3xl font-black text-gray-900 dark:text-white">{{ completed_today }}</p>
+        </div>
+
+        <!-- Today's Earnings -->
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            <span class="material-symbols-outlined text-primary text-3xl mb-4">payments</span>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Today's Earnings</p>
+            <p class="text-3xl font-black text-gray-900 dark:text-white">${{ total_earnings_today|floatformat:2 }}</p>
+        </div>
+
+        <!-- Rating -->
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            <span class="material-symbols-outlined text-primary text-3xl mb-4">star</span>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Average Rating</p>
+            <p class="text-3xl font-black text-gray-900 dark:text-white">{{ availability.average_rating|floatformat:1 }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Deliveries -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 mb-8 border border-gray-200 dark:border-gray-800">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <span class="material-symbols-outlined text-primary mr-2">delivery_dining</span>
+            Active Deliveries
+        </h2>
+
+        {% if active_deliveries %}
+        <div class="space-y-4">
+            {% for delivery in active_deliveries %}
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Order #{{ delivery.order.order_number }}
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ delivery.order.restaurant.name }}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                        {% if delivery.status == 'accepted' %}bg-blue-100 text-blue-700
+                        {% elif delivery.status == 'picked_up' %}bg-purple-100 text-purple-700
+                        {% elif delivery.status == 'en_route' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-gray-100 text-gray-700{% endif %}">
+                        {{ delivery.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Customer</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ delivery.order.user.get_full_name }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Delivery Address</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ delivery.order.delivery_address }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons based on status -->
+                <div class="flex gap-2 mt-4">
+                    {% if delivery.status == 'assigned' %}
+                    <!-- Accept/Reject buttons for newly assigned deliveries -->
+                    <button onclick="acceptDelivery({{ delivery.id }})"
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">check_circle</span>
+                        Accept
+                    </button>
+                    <button onclick="rejectDelivery({{ delivery.id }})"
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">cancel</span>
+                        Reject
+                    </button>
+                    {% elif delivery.status == 'accepted' %}
+                    <!-- Mark as Picked Up button -->
+                    <button onclick="updateStatus({{ delivery.id }}, 'picked_up')"
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">shopping_bag</span>
+                        Mark as Picked Up
+                    </button>
+                    {% elif delivery.status == 'picked_up' %}
+                    <!-- Mark as En Route button -->
+                    <button onclick="updateStatus({{ delivery.id }}, 'en_route')"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">local_shipping</span>
+                        Mark En Route
+                    </button>
+                    {% elif delivery.status == 'en_route' %}
+                    <!-- Mark as Delivered button -->
+                    <button onclick="updateStatus({{ delivery.id }}, 'delivered')"
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">done_all</span>
+                        Mark as Delivered
+                    </button>
+                    {% endif %}
+
+                    <!-- Call customer button (always available) -->
+                    <a href="tel:{{ delivery.order.user.phone_number }}"
+                        class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined">call</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600 mb-4">inbox</span>
+            <p class="text-gray-600 dark:text-gray-400">No active deliveries</p>
+            {% if availability.is_online %}
+            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Waiting for new orders...</p>
+            {% else %}
+            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Go online to start receiving orders</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Performance Summary -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <span class="material-symbols-outlined text-primary mr-2">analytics</span>
+            Performance Summary
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Deliveries</p>
+                <p class="text-2xl font-black text-gray-900 dark:text-white">{{ availability.total_deliveries }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Successful</p>
+                <p class="text-2xl font-black text-green-600">{{ availability.successful_deliveries }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">Success Rate</p>
+                <p class="text-2xl font-black text-primary">{{ availability.success_rate|floatformat:1 }}%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast Container -->
+<div id="notificationToast"
+    class="hidden fixed top-20 right-4 bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 max-w-md z-50 border-l-4 border-primary">
+    <div class="flex items-start">
+        <span class="material-symbols-outlined text-primary text-3xl mr-4">delivery_dining</span>
+        <div class="flex-1">
+            <h4 class="font-bold text-gray-900 dark:text-white mb-2">New Delivery Request!</h4>
+            <p id="toastRestaurant" class="text-sm text-gray-600 dark:text-gray-400"></p>
+            <p id="toastDistance" class="text-sm text-gray-600 dark:text-gray-400"></p>
+            <p id="toastEarnings" class="text-sm font-bold text-primary"></p>
+        </div>
+    </div>
+    <div class="mt-4 flex gap-2">
+        <button id="viewDeliveryBtn"
+            class="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded-lg">
+            View Details
+        </button>
+        <button onclick="hideNotification()"
+            class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-900 dark:text-white font-bold py-2 px-4 rounded-lg">
+            Dismiss
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // WebSocket connection for real-time notifications
+    const driverWs = new WebSocketManager('/ws/driver/notifications/');
+
+    driverWs.on('connected', () => {
+        console.log('✓ Connected to driver notifications');
+    });
+
+    driverWs.on('new_delivery', (data) => {
+        console.log('New delivery assignment:', data);
+
+        // Show toast notification
+        if (window.Toast) {
+            Toast.success(`New Delivery: ₦${data.earnings} earnings - ${data.distance}km`);
+        } else {
+            // Fallback if Toast is not available
+            document.getElementById('toastRestaurant').textContent = `📍 ${data.restaurant} → ${data.customer_name}`;
+            document.getElementById('toastDistance').textContent = `🚗 ${data.distance.toFixed(1)} km away`;
+            document.getElementById('toastEarnings').textContent = `💰 Estimated earnings: $${data.earnings.toFixed(2)}`;
+            showNotification();
+        }
+
+        // Play notification sound
+        try {
+            const audio = new Audio('/static/sounds/notification.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        } catch (e) {
+            playNotificationSound(); // Fallback to synthesized beep
+        }
+
+        // Show browser notification if permitted
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('New Delivery Assignment', {
+                body: `Order #${data.order_number} from ${data.restaurant}\nEarnings: ₦${data.earnings} • Distance: ${data.distance}km`,
+                icon: '/static/images/logo.png'
+            });
+        }
+
+        // Update active deliveries section without full page refresh
+        updateActiveDeliveries();
+    });
+
+    driverWs.on('delivery_reassigned', (data) => {
+        console.log('Delivery reassigned:', data);
+        if (window.Toast) {
+            Toast.warning(`Delivery #${data.delivery_id} reassigned: ${data.reason}`);
+        } else {
+            alert(`Delivery #${data.delivery_id} has been reassigned: ${data.reason}`);
+        }
+        updateActiveDeliveries();
+    });
+
+    driverWs.on('delivery_cancelled', (data) => {
+        console.log('Delivery cancelled:', data);
+        if (window.Toast) {
+            Toast.error(`Delivery cancelled: ${data.reason}`);
+        } else {
+            alert(`Delivery #${data.delivery_id} was cancelled: ${data.reason}`);
+        }
+        updateActiveDeliveries();
+    });
+
+    driverWs.on('status_update', (data) => {
+        console.log('Delivery status update:', data);
+        if (window.Toast) {
+            Toast.info(data.message);
+        } else if (data.status === 'ready_for_pickup') {
+            const toast = document.getElementById('notificationToast');
+            document.getElementById('toastRestaurant').textContent = data.message || 'Order ready for pickup!';
+            document.getElementById('toastDistance').textContent = '🍽️ Ready to collect';
+            document.getElementById('toastEarnings').textContent = 'Head to restaurant now!';
+            showNotification();
+            playNotificationSound();
+        }
+        updateActiveDeliveries();
+    });
+
+    // Connect
+    driverWs.connect();
+
+    // UI Helper Functions
+    function showNotification() {
+        const toast = document.getElementById('notificationToast');
+        if (toast) {
+            toast.classList.remove('hidden');
+            toast.classList.add('animate-pulse');
+            setTimeout(() => hideNotification(), 15000);
+        }
+    }
+
+    function hideNotification() {
+        const toast = document.getElementById('notificationToast');
+        if (toast) {
+            toast.classList.add('hidden');
+            toast.classList.remove('animate-pulse');
+        }
+    }
+
+    function playNotificationSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {}
+    }
+
+    function updateActiveDeliveries() {
+        fetch('/api/delivery/active-deliveries/', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.active_deliveries) {
+                updateActiveDeliveriesUI(data.active_deliveries);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating active deliveries:', error);
+        });
+    }
+
+    function updateActiveDeliveriesUI(activeDeliveries) {
+        const container = document.querySelector('.space-y-4');
+        if (!container) return;
+
+        if (activeDeliveries.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600 mb-4">inbox</span>
+                    <p class="text-gray-600 dark:text-gray-400">No active deliveries</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Waiting for new orders...</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        activeDeliveries.forEach(delivery => {
+            html += `
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white">Order #${delivery.order_number}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${delivery.restaurant}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(delivery.status)}">
+                            ${delivery.status_display}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400">Customer</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">${delivery.customer_name}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400">Delivery Address</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">${delivery.delivery_address}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        ${getActionButtons(delivery)}
+                        <a href="tel:${delivery.customer_phone}" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined">call</span>
+                        </a>
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'accepted': return 'bg-blue-100 text-blue-700';
+            case 'picked_up': return 'bg-purple-100 text-purple-700';
+            case 'en_route': return 'bg-yellow-100 text-yellow-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    }
+
+    function getActionButtons(delivery) {
+        let buttons = '';
+        switch (delivery.status) {
+            case 'assigned':
+                buttons = `
+                    <button onclick="acceptDelivery(${delivery.id})" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">check_circle</span> Accept
+                    </button>
+                    <button onclick="rejectDelivery(${delivery.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">cancel</span> Reject
+                    </button>`;
+                break;
+            case 'accepted':
+                buttons = `
+                    <button onclick="updateStatus(${delivery.id}, 'picked_up')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">shopping_bag</span> Mark as Picked Up
+                    </button>`;
+                break;
+            case 'picked_up':
+                buttons = `
+                    <button onclick="updateStatus(${delivery.id}, 'en_route')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">local_shipping</span> Mark En Route
+                    </button>`;
+                break;
+            case 'en_route':
+                buttons = `
+                    <button onclick="updateStatus(${delivery.id}, 'delivered')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-center text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm inline">done_all</span> Mark as Delivered
+                    </button>`;
+                break;
+        }
+        return buttons;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function acceptDelivery(deliveryId) {
+        if (!confirm('Accept this delivery?')) return;
+        fetch(`/delivery/driver/accept/${deliveryId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.Toast) Toast.success('Delivery accepted!');
+                updateActiveDeliveries();
+            } else {
+                if (window.Toast) Toast.error(data.error || 'Failed to accept delivery');
+            }
+        });
+    }
+
+    function rejectDelivery(deliveryId) {
+        const reason = prompt('Reason for rejection (optional):');
+        if (reason === null) return;
+        const formData = new FormData();
+        formData.append('reason', reason || 'Driver rejected');
+        fetch(`/delivery/driver/reject/${deliveryId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.Toast) Toast.info(data.message);
+                updateActiveDeliveries();
+            } else {
+                if (window.Toast) Toast.error(data.error || 'Failed to reject delivery');
+            }
+        });
+    }
+
+    function updateStatus(deliveryId, newStatus) {
+        const statusMessages = {
+            'picked_up': 'Mark as picked up from restaurant?',
+            'en_route': 'Mark as en route to customer?',
+            'delivered': 'Mark as delivered?'
+        };
+        if (!confirm(statusMessages[newStatus] || 'Update status?')) return;
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        fetch(`/delivery/driver/update-status/${deliveryId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.Toast) Toast.success('Status updated!');
+                updateActiveDeliveries();
+            } else {
+                if (window.Toast) Toast.error(data.error || 'Failed to update status');
+            }
+        });
+    }
+
+    // Connect on page load if verified
+    {% if user.is_verified_driver %}
+    document.addEventListener('DOMContentLoaded', () => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    });
+    {% endif %}
+
+    // Polling as fallback
+    setInterval(() => updateActiveDeliveries(), 30000);
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => driverWs.close());
+</script>
+{% endblock %}

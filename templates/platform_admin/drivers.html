@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Drivers - Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <a href="{% url 'platform_admin:dashboard' %}"
+                    class="text-primary hover:underline flex items-center gap-1">
+                    <span class="material-symbols-outlined !text-lg">arrow_back</span>
+                    Back to Dashboard
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Driver Management</h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
+            <form method="get" class="flex gap-4">
+                <select name="status"
+                    class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+                <button type="submit"
+                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">Filter</button>
+            </form>
+        </div>
+
+        <!-- Driver List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for driver in drivers %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                            <span
+                                class="material-symbols-outlined text-purple-600 dark:text-purple-400">delivery_dining</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">{{
+                                driver.get_full_name|default:driver.username }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ driver.email }}</p>
+                        </div>
+                    </div>
+                    {% if driver.is_verified_driver %}
+                    <span
+                        class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Verified</span>
+                    {% else %}
+                    <span
+                        class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Pending</span>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Phone:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.phone_number|default:"N/A" }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Deliveries:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.delivery_count|default:0 }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Earnings:</span>
+                        <span class="text-gray-900 dark:text-white">${{ driver.total_earnings|default:0|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Joined:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+
+                {% if not driver.is_verified_driver %}
+                <form method="post" action="{% url 'platform_admin:verify_driver' driver.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Verify Driver
+                    </button>
+                </form>
+                {% else %}
+                <a href="{% url 'delivery:driver_dashboard' %}"
+                    class="block w-full text-center bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    View Dashboard
+                </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <p class="text-center text-gray-500 dark:text-gray-400 py-12">No drivers found</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if drivers.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex gap-2">
+                {% if drivers.has_previous %}
+                <a href="?page={{ drivers.previous_page_number }}&status={{ status_filter }}"
+                    class="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Previous
+                </a>
+                {% endif %}
+                <span class="px-4 py-2 bg-primary text-white rounded-lg">
+                    Page {{ drivers.number }} of {{ drivers.paginator.num_pages }}
+                </span>
+                {% if drivers.has_next %}
+                <a href="?page={{ drivers.next_page_number }}&status={{ status_filter }}"
+                    class="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Next
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Pending - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
+            {% if vendor_profile.is_pending %}
+            <div class="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-5xl">schedule</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Application Under Review
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Thank you for applying to become a vendor on EmpressDish! 
+                Your application is currently being reviewed by our team.
+            </p>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <strong class="text-gray-900 dark:text-white">Business Name:</strong><br>
+                    {{ vendor_profile.business_name }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    <strong class="text-gray-900 dark:text-white">Applied On:</strong><br>
+                    {{ vendor_profile.application_date|date:"F d, Y" }}
+                </p>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-500">
+                We typically review applications within 2-3 business days. 
+                You'll receive an email notification once your application is processed.
+            </p>
+            {% elif vendor_profile.is_rejected %}
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-5xl">cancel</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Application Not Approved
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Unfortunately, your vendor application was not approved at this time.
+            </p>
+            {% if vendor_profile.rejection_reason %}
+            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Reason:</strong><br>
+                    {{ vendor_profile.rejection_reason }}
+                </p>
+            </div>
+            {% endif %}
+            <p class="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                You can contact our support team for more information or reapply after addressing the concerns.
+            </p>
+            <a href="{% url 'home' %}" class="inline-block bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                Back to Home
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

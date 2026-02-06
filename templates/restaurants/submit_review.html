@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Write a Review - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'orders:detail' order.order_number %}"
+                class="text-primary hover:underline flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back to Order
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Write a Review</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Share your experience with {{ restaurant.name }}</p>
+        </div>
+
+        <!-- Order Info Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex items-start gap-4">
+                {% if restaurant.cover_image %}
+                <img src="{{ restaurant.cover_image.url }}" alt="{{ restaurant.name }}"
+                    class="w-20 h-20 rounded-lg object-cover">
+                {% else %}
+                <div
+                    class="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-4xl">restaurant</span>
+                </div>
+                {% endif %}
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ restaurant.name }}</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Order #{{ order.order_number }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Delivered {{ order.delivered_at|date:"M d, Y" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8">
+            <form method="post" id="reviewForm">
+                {% csrf_token %}
+
+                <!-- Star Rating -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        {{ form.rating.label }}
+                    </label>
+                    <div class="star-rating-container flex items-center gap-2">
+                        {% for value, label in form.rating.field.choices %}
+                        <label class="star-rating-label cursor-pointer">
+                            <input type="radio" name="rating" value="{{ value }}" class="hidden star-rating-input"
+                                required>
+                            <span class="material-symbols-outlined star-icon text-5xl transition-colors duration-200"
+                                data-rating="{{ value }}">star</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2" id="ratingText">Select a rating</p>
+                    {% if form.rating.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.rating.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Comment -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        {{ form.comment.label }}
+                    </label>
+                    {{ form.comment }}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Minimum 10 characters</p>
+                    {% if form.comment.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.comment.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex gap-4">
+                    <button type="submit"
+                        class="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                        Submit Review
+                    </button>
+                    <a href="{% url 'orders:detail' order.order_number %}"
+                        class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-6 rounded-lg font-semibold text-center transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-3">💡 Writing a Great Review</h3>
+            <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+                <li>• Be specific about what you liked or didn't like</li>
+                <li>• Mention food quality, delivery time, and packaging</li>
+                <li>• Keep it helpful and constructive</li>
+                <li>• Be honest but respectful</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .star-icon {
+        color: #d1d5db;
+        /* gray-300 */
+        font-variation-settings: 'FILL' 0;
+        transition: all 0.2s;
+    }
+
+    .star-icon:hover,
+    .star-icon.active {
+        color: #f59e0b;
+        /* amber-500 */
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .dark .star-icon {
+        color: #4b5563;
+        /* gray-600 dark */
+    }
+
+    .dark .star-icon:hover,
+    .dark .star-icon.active {
+        color: #fbbf24;
+        /* amber-400 */
+        font-variation-settings: 'FILL' 1;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const stars = document.querySelectorAll('.star-icon');
+        const ratingText = document.getElementById('ratingText');
+        const ratingLabels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+        let selectedRating = 0;
+
+        stars.forEach((star, index) => {
+            const rating = index + 1;
+            const input = star.parentElement.querySelector('input');
+
+            // Hover effect
+            star.addEventListener('mouseenter', () => {
+                updateStars(rating, false);
+            });
+
+            // Click to select
+            star.addEventListener('click', () => {
+                selectedRating = rating;
+                input.checked = true;
+                updateStars(rating, true);
+                ratingText.textContent = `${rating} Star${rating > 1 ? 's' : ''} - ${ratingLabels[rating - 1]}`;
+            });
+        });
+
+        // Reset on mouse leave container
+        const container = document.querySelector('.star-rating-container');
+        container.addEventListener('mouseleave', () => {
+            updateStars(selectedRating, true);
+        });
+
+        function updateStars(rating, permanent) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.fontVariationSettings = "'FILL' 1";
+                    star.classList.add('active');
+                } else {
+                    star.style.fontVariationSettings = "'FILL' 0";
+                    star.classList.remove('active');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

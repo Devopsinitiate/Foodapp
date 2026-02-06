@@ -1,0 +1,46 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #F97316;">✅ Order Confirmed!</h2>
+
+<p>Hi {{ order.user.first_name|default:order.user.username }},</p>
+
+<p>Great news! <strong>{{ order.restaurant.name }}</strong> has confirmed your order and is now preparing your delicious
+    meal.</p>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #F97316;">Order #{{ order.order_number }}</h3>
+    <p><strong>Restaurant:</strong> {{ order.restaurant.name }}</p>
+    <p><strong>Total:</strong> ${{ order.total }}</p>
+    <p><strong>Payment:</strong>
+        {% if order.payment_status == 'paid' %}
+        💳 Paid
+        {% elif order.payment_status == 'cod' %}
+        💵 Cash on Delivery
+        {% endif %}
+    </p>
+
+    <h4>Your Items:</h4>
+    <ul style="list-style: none; padding-left: 0;">
+        {% for item in order.items.all %}
+        <li style="padding: 5px 0;">
+            <strong>{{ item.quantity }}x</strong> {{ item.menu_item.name }} - ${{ item.subtotal }}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p style="margin-top: 15px;"><strong>Delivering to:</strong><br>
+        {{ order.delivery_address }}<br>
+        {{ order.delivery_city }}, {{ order.delivery_state }}</p>
+</div>
+
+<p style="color: #666; font-size: 14px;">
+    ⏱️ Estimated delivery: {{ order.estimated_delivery_time|default:"30-45" }} minutes
+</p>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}/orders/order/{{ order.order_number }}/track/" class="button">Track Your Order</a>
+</p>
+
+<p style="margin-top: 20px; color: #666;">We'll notify you when a driver has been assigned to your order.</p>
+{% endblock %}

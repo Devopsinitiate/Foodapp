@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - EmpressDish</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        .material-symbols-outlined {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-2xl w-full text-center">
+            <!-- Animated Icon -->
+            <div class="mb-8">
+                <span class="material-symbols-outlined text-yellow-500" style="font-size: 120px;">block</span>
+            </div>
+
+            <!-- Error Message -->
+            <h1 class="text-6xl font-black text-gray-900 dark:text-white mb-4">403</h1>
+            <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">Access Denied</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+                Sorry, you don't have permission to access this page.
+                <br>This area might need special access rights. 🔒
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="/"
+                    class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">home</span>
+                    Go Home
+                </a>
+                <a href="{% url 'users:login' %}"
+                    class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors inline-flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">login</span>
+                    Login
+                </a>
+            </div>
+
+            <!-- Why this happened -->
+            <div
+                class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-6 border border-yellow-200 dark:border-yellow-800 max-w-md mx-auto">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Why did this happen?</h3>
+                <ul class="text-left text-gray-600 dark:text-gray-400 space-y-2 text-sm">
+                    <li class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-yellow-600 !text-xl">info</span>
+                        <span>You're not logged in</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-yellow-600 !text-xl">info</span>
+                        <span>You don't have the required permissions</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-yellow-600 !text-xl">info</span>
+                        <span>This page is for vendors/drivers only</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-yellow-600 !text-xl">info</span>
+                        <span>Your account needs verification</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Help Text -->
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-8">
+                Need access? <a href="mailto:support@empressdish.com" class="text-primary hover:underline">Contact
+                    Support</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

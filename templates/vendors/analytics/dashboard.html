@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics - Vendor Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Track your business performance</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="?days=7" class="px-4 py-2 rounded-lg text-sm font-medium {% if days == 7 %}bg-primary text-white{% else %}bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">
+                    7 Days
+                </a>
+                <a href="?days=30" class="px-4 py-2 rounded-lg text-sm font-medium {% if days == 30 %}bg-primary text-white{% else %}bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">
+                    30 Days
+                </a>
+                <a href="?days=90" class="px-4 py-2 rounded-lg text-sm font-medium {% if days == 90 %}bg-primary text-white{% else %}bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">
+                    90 Days
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">₦{{ total_revenue|floatformat:0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-2xl">payments</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Orders</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ total_orders }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">shopping_bag</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Avg Order Value</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">₦{{ avg_order_value|floatformat:0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">trending_up</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Items -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Top Selling Items</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Quantity Sold</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for item in popular_items %}
+                        <tr>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ item.menu_item__name }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ item.total_quantity }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">₦{{ item.total_revenue|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                No data available for this period
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

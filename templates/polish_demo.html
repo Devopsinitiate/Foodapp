@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Polish Features Demo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Polish Features Demo</h1>
+
+        <!-- Toast Notifications -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Toast Notifications</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="Toast.success('Operation completed successfully!')"
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Success Toast
+                </button>
+                <button onclick="Toast.error('Something went wrong!')"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    Error Toast
+                </button>
+                <button onclick="Toast.warning('Please review this action')"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">
+                    Warning Toast
+                </button>
+                <button onclick="Toast.info('Helpful information here')"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Info Toast
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Loading Overlay</h2>
+            <button onclick="showLoadingDemo()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90">
+                Show Loading (3 seconds)
+            </button>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Confirmation Modal</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="showConfirmDemo('warning')"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">
+                    Warning Confirm
+                </button>
+                <button onclick="showConfirmDemo('error')"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    Danger Confirm
+                </button>
+                <button onclick="showConfirmDemo('success')"
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Success Confirm
+                </button>
+                <button onclick="showConfirmDemo('info')"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Info Confirm
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Validation -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Form Validation</h2>
+            <form id="demo-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                    <input type="text" name="email"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder="your@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Coupon Code</label>
+                    <input type="text" name="coupon"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder="Enter code">
+                </div>
+                <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90">
+                    Validate Form
+                </button>
+            </form>
+        </div>
+
+        <!-- Button Loading State -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Button Loading State</h2>
+            <button id="loading-btn" onclick="showButtonLoading()"
+                class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90">
+                Click to Load
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Loading Demo
+    function showLoadingDemo() {
+        Loading.show('Processing your request...');
+        setTimeout(() => {
+            Loading.hide();
+            Toast.success('Loading complete!');
+        }, 3000);
+    }
+
+    // Confirm Demo
+    async function showConfirmDemo(type) {
+        console.log('Checking Modal...');
+        console.log('window.Modal:', window.Modal);
+        console.log('typeof window.Modal.confirm:', typeof window.Modal?.confirm);
+
+        const messages = {
+            warning: { title: 'Warning', message: 'This action cannot be undone!' },
+            error: { title: 'Delete Item', message: 'Are you sure you want to delete this item?' },
+            success: { title: 'Confirm Success', message: 'Everything looks good. Proceed?' },
+            info: { title: 'Information', message: 'Did you know this is just a demo?' }
+        };
+
+        const confirmed = await window.Modal.confirm({ ...messages[type], type: type });
+
+        if (confirmed) {
+            Toast.success('Action confirmed!');
+        } else {
+            Toast.info('Action cancelled');
+        }
+    }
+
+    // Form Validation Demo
+    const form = document.getElementById('demo-form');
+    FormValidator.setupRealTimeValidation(form, {
+        email: {
+            required: true,
+            email: true
+        },
+        coupon: {
+            required: true,
+            minLength: 4,
+            pattern: /^[A-Z0-9]+$/,
+            patternMessage: 'Only uppercase letters and numbers allowed'
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        Toast.success('Form is valid!');
+    });
+
+    // Button Loading Demo
+    function showButtonLoading() {
+        const btn = document.getElementById('loading-btn');
+        setButtonLoading(btn, true);
+
+        setTimeout(() => {
+            setButtonLoading(btn, false);
+            Toast.success('Process complete!');
+        }, 2000);
+    }
+</script>
+{% endblock %}

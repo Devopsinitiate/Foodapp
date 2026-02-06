@@ -1,0 +1,18 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Welcome to EmpressDish, {{ user.first_name|default:user.username }}!</h2>
+
+<p>We're thrilled to have you join our community of food lovers.</p>
+
+<p>With EmpressDish, you can:</p>
+<ul>
+    <li>Browse top-rated restaurants</li>
+    <li>Order your favorite meals</li>
+    <li>Track your delivery in real-time</li>
+</ul>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}" class="button">Start Ordering</a>
+</p>
+{% endblock %}

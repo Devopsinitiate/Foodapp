@@ -1,0 +1,23 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Order Cancelled</h2>
+
+<p>Hi {{ user.first_name|default:user.username }},</p>
+
+<p>Your order <strong>#{{ order.order_number }}</strong> has been cancelled as requested.</p>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 4px; margin: 20px 0;">
+    <p><strong>Reason:</strong> {{ order.cancellation_reason }}</p>
+
+    {% if order.payment_status == 'paid' %}
+    <p><strong>Refund Status:</strong> Your refund of ₦{{ order.total }} will be processed within 3-5 business days.</p>
+    {% endif %}
+</div>
+
+<p>We hope to serve you again soon!</p>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}" class="button">Browse Restaurants</a>
+</p>
+{% endblock %}

@@ -1,0 +1,102 @@
+# Critical - Exclude large directories
+venv/
+env/
+ENV/
+.venv
+media/
+staticfiles/
+static/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.github/
+node_modules/
+*.sqlite3
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Documentation
+docs/_build/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Node modules (if using npm)
+node_modules/
+npm-debug.log
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Redis dump
+dump.rdb

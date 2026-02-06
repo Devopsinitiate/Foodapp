@@ -1,0 +1,78 @@
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Static files (already collected)
+/staticfiles/
+/static/
+
+# Media files (user uploads)
+/media/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+*.cover
+.hypothesis/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Documentation (generated)
+docs/_build/
+site/
+
+# Temporary files
+*.bak
+*.tmp
+*.temp
+diagnostic_output.txt
+js_test_results.txt
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Don't ignore
+!.gitignore
+!.gitkeep

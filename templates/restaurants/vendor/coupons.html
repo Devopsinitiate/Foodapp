@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Coupons - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Coupon Management</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">{{ restaurant.name }}</p>
+            </div>
+            <a href="{% url 'restaurants:create_coupon' %}"
+                class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-2">
+                <span class="material-symbols-outlined">add</span>
+                Create Coupon
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-4">
+                    <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
+                        <span
+                            class="material-symbols-outlined text-green-600 dark:text-green-400 !text-3xl">local_activity</span>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ active_coupons }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Active Coupons</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 !text-3xl">redeem</span>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_redemptions }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Redemptions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-4">
+                    <div class="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
+                        <span
+                            class="material-symbols-outlined text-purple-600 dark:text-purple-400 !text-3xl">savings</span>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ total_discount_given|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Discounts Given</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coupons Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Code
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Discount
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Usage
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Valid
+                                Until</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Status
+                            </th>
+                            <th class="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white">Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for coupon in coupons %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="px-6 py-4">
+                                <div>
+                                    <p class="font-mono font-bold text-gray-900 dark:text-white">{{ coupon.code }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ coupon.description|truncatewords:10 }}</p>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-semibold text-gray-900 dark:text-white">{{ coupon.get_discount_display }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm">
+                                    <p class="text-gray-900 dark:text-white">{{ coupon.usage_count }} uses</p>
+                                    {% if coupon.max_total_uses %}
+                                    <p class="text-gray-500 dark:text-gray-400">of {{ coupon.max_total_uses }}</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-gray-900 dark:text-white">{{ coupon.valid_until|date:"M d, Y" }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if coupon.is_active and coupon.is_valid_for_date %}
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Active
+                                </span>
+                                {% elif not coupon.is_valid_for_date %}
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                    Expired
+                                </span>
+                                {% else %}
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+                                    Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <a href="{% url 'restaurants:coupon_analytics' coupon.pk %}"
+                                        class="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                        title="View Analytics">
+                                        <span class="material-symbols-outlined !text-xl">analytics</span>
+                                    </a>
+                                    <a href="{% url 'restaurants:edit_coupon' coupon.pk %}"
+                                        class="text-gray-600 dark:text-gray-400 hover:text-primary text-sm"
+                                        title="Edit">
+                                        <span class="material-symbols-outlined !text-xl">edit</span>
+                                    </a>
+                                    <form method="post" action="{% url 'restaurants:toggle_coupon' coupon.pk %}"
+                                        class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="text-gray-600 dark:text-gray-400 hover:text-primary text-sm"
+                                            title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                            <span class="material-symbols-outlined !text-xl">
+                                                {% if coupon.is_active %}toggle_on{% else %}toggle_off{% endif %}
+                                            </span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <span
+                                    class="material-symbols-outlined text-gray-400 !text-5xl mb-4 block">local_activity</span>
+                                <p class="text-gray-500 dark:text-gray-400 mb-4">No coupons created yet</p>
+                                <a href="{% url 'restaurants:create_coupon' %}"
+                                    class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors inline-block">
+                                    Create Your First Coupon
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

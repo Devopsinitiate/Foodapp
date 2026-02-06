@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Respond to Review - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-2xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'vendors:manage_reviews' %}" class="text-primary hover:underline flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back to Reviews
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Respond to Review</h1>
+        </div>
+
+        <!-- Review Context -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                    {{ review.user.username|first|upper }}
+                </div>
+                <div>
+                    <p class="font-bold text-gray-900 dark:text-white">{{ review.user.get_full_name|default:review.user.username }}</p>
+                    <div class="flex items-center gap-1 text-primary">
+                        {% for i in "12345" %}
+                        <span class="material-symbols-outlined !text-xs" style="{% if forloop.counter <= review.rating %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-700 dark:text-gray-300 italic">"{{ review.comment }}"</p>
+            <p class="text-xs text-gray-500 mt-4">{{ review.created_at|date:"M d, Y" }} • Order #{{ review.order.order_number }}</p>
+        </div>
+
+        <!-- Response Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 border border-gray-200 dark:border-gray-700">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2">
+                        Your Response
+                    </label>
+                    {{ form.vendor_response }}
+                    {% if form.vendor_response.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.vendor_response.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-colors">
+                        {% if review.vendor_response %}Update Response{% else %}Post Response{% endif %}
+                    </button>
+                    <a href="{% url 'vendors:manage_reviews' %}" class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold py-3 rounded-lg text-center transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">💡 Tips for a good response</h3>
+            <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+                <li>• Thank the customer for their feedback</li>
+                <li>• Keep it professional and polite</li>
+                <li>• For negative reviews, address the issues constructively</li>
+                <li>• Let them know you value their business</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-8">Shopping Cart</h1>
+    
+    {% if cart_items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div class="space-y-4">
+                {% for item in cart_items %}
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 flex gap-4">
+                    <img src="{% if item.menu_item.image %}{{ item.menu_item.image.url }}{% else %}https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200{% endif %}" alt="{{ item.menu_item.name }}" class="w-24 h-24 rounded-lg object-cover">
+                    
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ item.menu_item.name }}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ item.menu_item.restaurant.name }}</p>
+                        <p class="text-lg font-black text-gray-900 dark:text-white mt-2">${{ item.menu_item.current_price }}</p>
+                        
+                        <div class="flex items-center gap-3 mt-3">
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity|add:'-1' }})" class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-700">
+                                <span class="material-symbols-outlined text-sm">remove</span>
+                            </button>
+                            <span class="font-semibold text-gray-900 dark:text-white">{{ item.quantity }}</span>
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity|add:'1' }})" class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-700">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-end justify-between">
+                        <p class="text-xl font-black text-gray-900 dark:text-white">${{ item.total_price }}</p>
+                        <button onclick="removeItem({{ item.id }})" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button onclick="clearCart()" class="mt-6 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-semibold">
+                Clear Cart
+            </button>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24">
+                <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Order Summary</h2>
+                    
+                    <div class="space-y-3 text-sm mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+                            <span class="text-gray-900 dark:text-white font-semibold">${{ cart.subtotal }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Delivery Fee</span>
+                            <span class="text-gray-900 dark:text-white font-semibold">$3.99</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Tax</span>
+                            <span class="text-gray-900 dark:text-white font-semibold" id="tax-amount">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">Total</span>
+                            <span class="text-2xl font-black text-gray-900 dark:text-white" id="total-amount">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'orders:checkout' %}" class="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary/90 transition-colors">
+                        <span>Proceed to Checkout</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                    
+                    <a href="{% url 'restaurants:list' %}" class="flex items-center justify-center gap-2 w-full rounded-lg bg-gray-200 dark:bg-gray-800 px-6 py-3 text-base font-bold text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors mt-3">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        <span>Continue Shopping</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <span class="material-symbols-outlined text-gray-400 text-8xl mb-4">shopping_cart</span>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your cart is empty</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Add some delicious items to get started!</p>
+        <a href="{% url 'restaurants:list' %}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3 text-base font-bold text-white hover:bg-primary/90 transition-colors">
+            <span>Browse Restaurants</span>
+            <span class="material-symbols-outlined">restaurant</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Calculate tax and total on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const subtotal = parseFloat('{{ cart.subtotal }}') || 0;
+    const deliveryFee = 3.99;
+    const taxRate = 0.08;
+    
+    const tax = subtotal * taxRate;
+    const total = subtotal + deliveryFee + tax;
+    
+    // Update tax display
+    const taxElement = document.getElementById('tax-amount');
+    if (taxElement) {
+        taxElement.textContent = '$' + tax.toFixed(2);
+    }
+    
+    // Update total display
+    const totalElement = document.getElementById('total-amount');
+    if (totalElement) {
+        totalElement.textContent = '$' + total.toFixed(2);
+    }
+});
+
+function updateQuantity(itemId, newQuantity) {
+    if (newQuantity < 1) {
+        removeItem(itemId);
+        return;
+    }
+    
+    fetch(`/api/orders/cart/items/${itemId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update quantity');
+    });
+}
+
+function removeItem(itemId) {
+    if (!confirm('Remove this item from cart?')) return;
+    
+    fetch(`/api/orders/cart/items/${itemId}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(() => {
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to remove item');
+    });
+}
+
+function clearCart() {
+    if (!confirm('Clear all items from cart?')) return;
+    
+    fetch('/api/orders/cart/clear/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(() => {
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to clear cart');
+    });
+}
+</script>
+{% endblock %}

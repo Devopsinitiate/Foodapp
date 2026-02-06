@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Driver Registration - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-3xl">
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Become a Driver</h1>
+            <p class="text-gray-600 dark:text-gray-400">Join our delivery team and start earning today!</p>
+        </div>
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Personal Information -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Personal Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
+                        {{ form.username }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First
+                            Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone
+                            Number</label>
+                        {{ form.phone_number }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Address</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Street
+                            Address</label>
+                        {{ form.street_address }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                        {{ form.city }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
+                        {{ form.state }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Postal
+                            Code</label>
+                        {{ form.postal_code }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver License -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Driver License</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">License
+                            Number</label>
+                        {{ form.driver_license_number }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expiry
+                            Date</label>
+                        {{ form.driver_license_expiry }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Vehicle Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vehicle
+                            Type</label>
+                        {{ form.vehicle_type }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">License
+                            Plate</label>
+                        {{ form.vehicle_plate }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Insurance
+                            Expiry</label>
+                        {{ form.vehicle_insurance_expiry }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Account Security</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                        {{ form.password1 }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm
+                            Password</label>
+                        {{ form.password2 }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="flex items-start">
+                {{ form.agree_to_terms }}
+                <label class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    I agree to the driver terms and conditions
+                </label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit"
+                class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                Register as Driver
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+            Already have an account? <a href="{% url 'users:login' %}" class="text-primary hover:underline">Login
+                here</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form input[type="date"],
+    form select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        background-color: white;
+    }
+
+    .dark form input[type="text"],
+    .dark form input[type="email"],
+    .dark form input[type="password"],
+    .dark form input[type="date"],
+    .dark form select {
+        background-color: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+</style>
+{% endblock %}

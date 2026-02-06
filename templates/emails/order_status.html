@@ -1,0 +1,71 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Order Update - #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<h2>{{ status_message }} 📦</h2>
+
+<p>Hi {{ user.first_name|default:user.username }},</p>
+
+<p>Your order from <strong>{{ order.restaurant.name }}</strong> has been updated.</p>
+
+<div class="success-box">
+    <p style="margin: 0;">
+        <strong>Order #{{ order.order_number }}</strong><br>
+        Status: <strong>{{ order.get_status_display }}</strong>
+    </p>
+</div>
+
+{% if order.status == 'confirmed' %}
+<p>Great news! The restaurant has confirmed your order and will start preparing it shortly.</p>
+
+{% elif order.status == 'preparing' %}
+<p>Your delicious meal is being prepared right now. It won't be long!</p>
+
+{% elif order.status == 'ready' %}
+<p>Your order is ready! Our delivery person will pick it up soon.</p>
+
+{% elif order.status == 'out_for_delivery' %}
+<p>Your order is on its way! The delivery person is heading to your location.</p>
+<div class="info-box">
+    <p style="margin: 0;"><strong>Estimated Arrival:</strong> {{ order.estimated_delivery_time|date:"H:i" }}</p>
+</div>
+
+{% elif order.status == 'delivered' %}
+<p>Your order has been delivered! We hope you enjoy your meal. 🎉</p>
+<p>How was your experience? We'd love to hear your feedback!</p>
+<div style="text-align: center;">
+    <a href="{{ site_url }}/restaurants/{{ order.restaurant.slug }}/#reviews" class="button">Leave a Review</a>
+</div>
+
+{% elif order.status == 'cancelled' %}
+<p>Your order has been cancelled. {% if order.payment_status == 'paid' %}A refund will be processed within 3-5 business days.{% endif %}</p>
+{% endif %}
+
+<div class="order-details">
+    <h3 style="margin-top: 0; color: #F97316;">Order Summary</h3>
+    <table>
+        <tr>
+            <td>Restaurant:</td>
+            <td>{{ order.restaurant.name }}</td>
+        </tr>
+        <tr>
+            <td>Order Date:</td>
+            <td>{{ order.created_at|date:"F d, Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td>Total Amount:</td>
+            <td><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ site_url }}/orders/{{ order.order_number }}/" class="button">View Order Details</a>
+</div>
+
+<p>Thank you for choosing EmpressDish!</p>
+
+<p>Best regards,<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

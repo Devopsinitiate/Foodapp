@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Become a Vendor - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Partner with EmpressDish
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400">
+                Join thousands of restaurants growing their business with us
+            </p>
+        </div>
+
+        <!-- Benefits Section -->
+        <div class="grid md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Grow Your Business</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Reach more customers and increase your revenue</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">dashboard</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Easy Management</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Powerful dashboard to manage orders and menu</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">payments</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Fast Payments</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Get paid quickly with automated payouts</p>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Vendor Application</h2>
+            
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <p class="text-red-800 dark:text-red-200">{{ form.non_field_errors }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Business Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Business Information</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Business Name *
+                        </label>
+                        {{ form.business_name }}
+                        {% if form.business_name.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.business_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Business Type *
+                        </label>
+                        {{ form.business_type }}
+                        {% if form.business_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.business_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Business Registration Number
+                        </label>
+                        {{ form.business_registration_number }}
+                        {% if form.business_registration_number.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.business_registration_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Years of Experience *
+                        </label>
+                        {{ form.years_of_experience }}
+                        {% if form.years_of_experience.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.years_of_experience.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Business Description *
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Bank Details -->
+                <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bank Account Details</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">For receiving payments</p>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Account Name *
+                        </label>
+                        {{ form.bank_account_name }}
+                        {% if form.bank_account_name.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.bank_account_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Account Number *
+                        </label>
+                        {{ form.bank_account_number }}
+                        {% if form.bank_account_number.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.bank_account_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Bank Name *
+                        </label>
+                        {{ form.bank_name }}
+                        {% if form.bank_name.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.bank_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Documents (Optional)</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Business License
+                        </label>
+                        {{ form.business_license }}
+                        {% if form.business_license.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.business_license.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Health Certificate
+                        </label>
+                        {{ form.health_certificate }}
+                        {% if form.health_certificate.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.health_certificate.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <label class="flex items-start">
+                        {{ form.terms_accepted }}
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                            I agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a> 
+                            and <a href="#" class="text-primary hover:underline">Vendor Agreement</a>
+                        </span>
+                    </label>
+                    {% if form.terms_accepted.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.terms_accepted.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        Submit Application
+                    </button>
+                    <a href="{% url 'home' %}" class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

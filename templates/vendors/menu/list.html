@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Menu Management - Vendor Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Menu Management</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your menu items</p>
+            </div>
+            <a href="{% url 'vendors:menu_item_create' %}" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined">add</span>
+                Add Menu Item
+            </a>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
+            <form method="get" class="grid md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Restaurant</label>
+                    <select name="restaurant" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="">All Restaurants</option>
+                        {% for rest in restaurants %}
+                        <option value="{{ rest.id }}" {% if selected_restaurant == rest.id|stringformat:"s" %}selected{% endif %}>{{ rest.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                    <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
+                    <input type="text" name="search" value="{{ search }}" placeholder="Search items..." class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+                <div class="md:col-span-3">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg">Apply Filters</button>
+                    <a href="{% url 'vendors:menu_list' %}" class="ml-2 px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Menu Items Grid -->
+        {% if menu_items %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in menu_items %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
+                <div class="relative h-48">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-6xl">restaurant_menu</span>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                            {% if item.is_available %}bg-green-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                            {% if item.is_available %}Available{% else %}Unavailable{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ item.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ item.restaurant.name }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{{ item.description }}</p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xl font-bold text-primary">₦{{ item.price|floatformat:0 }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <a href="{% url 'vendors:menu_item_edit' item.id %}" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium">
+                            Edit
+                        </a>
+                        <a href="{% url 'vendors:menu_item_delete' item.id %}" class="px-4 py-2 border border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium">
+                            Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-12 text-center">
+            <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-gray-400 text-5xl">restaurant_menu</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Menu Items Yet</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Start adding items to your menu</p>
+            <a href="{% url 'vendors:menu_item_create' %}" class="inline-block bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg">
+                Add Your First Item
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

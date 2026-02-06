@@ -1,0 +1,26 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Order Confirmed!</h2>
+
+<p>Hi {{ user.first_name|default:user.username }},</p>
+
+<p>Thanks for your order! We've received it and the restaurant is preparing your food.</p>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 4px; margin: 20px 0;">
+    <h3 style="margin-top: 0;">Order #{{ order.order_number }}</h3>
+    <p><strong>Total:</strong> ₦{{ order.total_amount }}</p>
+    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+
+    <h4>Order Details:</h4>
+    <ul>
+        {% for item in order.items.all %}
+        <li>{{ item.quantity }}x {{ item.menu_item.name }} - ₦{{ item.price }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="{{ site_url }}/orders/order/{{ order.order_number }}/" class="button">Track Order</a>
+</p>
+{% endblock %}

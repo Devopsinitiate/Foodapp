@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Restaurants - Vendor Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Restaurants</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your restaurant listings</p>
+            </div>
+            <a href="{% url 'vendors:restaurant_create' %}"
+                class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined">add</span>
+                Add Restaurant
+            </a>
+        </div>
+
+        <!-- Restaurants Grid -->
+        {% if restaurants %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for restaurant in restaurants %}
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div class="relative h-48">
+                    {% if restaurant.cover_image %}
+                    <img src="{{ restaurant.cover_image.url }}" alt="{{ restaurant.name }}"
+                        class="w-full h-full object-cover">
+                    {% else %}
+                    <div
+                        class="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-6xl">restaurant</span>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4">
+                        <span
+                            class="px-3 py-1 rounded-full text-xs font-semibold
+                            {% if restaurant.is_accepting_orders %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
+                            {% if restaurant.is_accepting_orders %}Open{% else %}Closed{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ restaurant.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{{ restaurant.description }}
+                    </p>
+
+                    <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-lg">star</span>
+                            <span>{{ restaurant.rating|floatformat:1 }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-lg">restaurant_menu</span>
+                            <span>{{ restaurant.menu_items.count }} items</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <a href="{% url 'vendors:restaurant_edit' restaurant.id %}"
+                            class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors">
+                            Edit
+                        </a>
+                        <a href="{% url 'restaurants:detail' restaurant.slug %}"
+                            class="flex-1 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors">
+                            View
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-12 text-center">
+            <div
+                class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-gray-400 text-5xl">restaurant</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Restaurants Yet</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Get started by adding your first restaurant</p>
+            <a href="{% url 'vendors:restaurant_create' %}"
+                class="inline-block bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg transition-colors">
+                Add Your First Restaurant
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

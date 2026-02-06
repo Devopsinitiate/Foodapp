@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Favorites - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">My Favorite Restaurants ❤️</h1>
+            <p class="text-gray-600 dark:text-gray-400">Your saved restaurants for quick access</p>
+        </div>
+
+        {% if restaurants %}
+        <!-- Favorites Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for restaurant in restaurants %}
+            <div class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                <!-- Restaurant Image -->
+                <div class="relative h-48 bg-cover bg-center" style="background-image: url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800{% endif %}');">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    
+                    <!-- Favorite Button -->
+                    <button 
+                        onclick="toggleFavorite({{ restaurant.id }}, this)"
+                        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center hover:scale-110 transition-transform favorite-btn"
+                        data-restaurant-id="{{ restaurant.id }}"
+                        data-is-favorite="true"
+                    >
+                        <span class="material-symbols-outlined text-red-500 favorite-icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                    </button>
+                    
+                    <!-- Status Badge -->
+                    {% if restaurant.is_accepting_orders %}
+                    <div class="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                        Open Now
+                    </div>
+                    {% else %}
+                    <div class="absolute top-4 left-4 px-3 py-1 bg-gray-500 text-white text-xs font-semibold rounded-full">
+                        Closed
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Restaurant Info -->
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        <a href="{% url 'restaurants:detail' restaurant.slug %}" class="hover:text-primary">
+                            {{ restaurant.name }}
+                        </a>
+                    </h3>
+                    
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                        {{ restaurant.description }}
+                    </p>
+                    
+                    <!-- Categories -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% for category in restaurant.categories.all|slice:":3" %}
+                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded-full">
+                            {{ category.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-yellow-500 text-lg">star</span>
+                            <span>{{ restaurant.average_rating|floatformat:1 }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                            <span>{{ restaurant.estimated_delivery_time }} min</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-lg">payments</span>
+                            <span>₦{{ restaurant.delivery_fee|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Button -->
+                    <a href="{% url 'restaurants:detail' restaurant.slug %}" class="block w-full text-center bg-primary hover:bg-primary-dark text-white font-semibold py-3 rounded-lg transition-colors">
+                        View Menu
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white dark:bg-gray-900 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-800">
+            <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-gray-400 text-6xl">favorite</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">No Favorites Yet</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Start adding your favorite restaurants for quick access!
+            </p>
+            <a href="{% url 'restaurants:list' %}" class="inline-block bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+                Browse Restaurants
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleFavorite(restaurantId, button) {
+    fetch(`/restaurants/${restaurantId}/toggle-favorite/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const icon = button.querySelector('.favorite-icon');
+            if (data.is_favorite) {
+                icon.style.fontVariationSettings = "'FILL' 1";
+                icon.classList.add('text-red-500');
+                icon.classList.remove('text-gray-400');
+            } else {
+                icon.style.fontVariationSettings = "'FILL' 0";
+                icon.classList.remove('text-red-500');
+                icon.classList.add('text-gray-400');
+                // Remove from page if on favorites page
+                button.closest('.grid > div')?.remove();
+                
+                // Show empty state if no more favorites
+                if (document.querySelectorAll('.grid > div').length === 0) {
+                    location.reload();
+                }
+            }
+            
+            // Show toast notification
+            showToast(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to update favorite', 'error');
+    });
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

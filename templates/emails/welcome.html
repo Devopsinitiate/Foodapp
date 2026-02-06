@@ -1,0 +1,31 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Welcome to EmpressDish!{% endblock %}
+
+{% block content %}
+<h2>Welcome to EmpressDish, {{ user.first_name|default:user.username }}! 🎉</h2>
+
+<p>We're thrilled to have you join our community of food lovers!</p>
+
+<p>With EmpressDish, you can:</p>
+<ul style="color: #4b5563; line-height: 1.8;">
+    <li>🍕 Browse hundreds of restaurants</li>
+    <li>🛒 Order your favorite meals</li>
+    <li>💳 Pay securely online</li>
+    <li>📍 Track your delivery in real-time</li>
+    <li>⭐ Save your favorite restaurants</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ site_url }}" class="button">Start Ordering Now</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>💡 Pro Tip:</strong> Complete your profile to get personalized restaurant recommendations!</p>
+</div>
+
+<p>If you have any questions, our support team is always here to help.</p>
+
+<p>Happy ordering!<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

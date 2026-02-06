@@ -1,0 +1,71 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}New Order Received - #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<h2>New Order Received! 🔔</h2>
+
+<p>Hi {{ vendor.first_name|default:vendor.username }},</p>
+
+<p>You have a new order at <strong>{{ restaurant.name }}</strong>!</p>
+
+<div class="success-box">
+    <p style="margin: 0;">
+        <strong>Order #{{ order.order_number }}</strong><br>
+        Placed: {{ order.created_at|date:"F d, Y H:i" }}
+    </p>
+</div>
+
+<div class="order-details">
+    <h3 style="margin-top: 0; color: #F97316;">Order Details</h3>
+    
+    <table>
+        <tr>
+            <td>Customer:</td>
+            <td>{{ order.user.username }}</td>
+        </tr>
+        <tr>
+            <td>Phone:</td>
+            <td>{{ order.contact_phone }}</td>
+        </tr>
+        <tr>
+            <td>Delivery Address:</td>
+            <td>{{ order.delivery_address }}, {{ order.delivery_city }}</td>
+        </tr>
+        <tr>
+            <td>Payment Status:</td>
+            <td><strong>{{ order.get_payment_status_display }}</strong></td>
+        </tr>
+    </table>
+    
+    <h4 style="margin-top: 20px; color: #6b7280;">Items to Prepare:</h4>
+    {% for item in items %}
+    <div style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+        <strong style="font-size: 18px;">{{ item.quantity }}x {{ item.item_name }}</strong><br>
+        {% if item.special_instructions %}
+        <span style="color: #F97316; font-style: italic;">Note: {{ item.special_instructions }}</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+    
+    <table style="margin-top: 20px;">
+        <tr style="font-size: 18px; font-weight: bold;">
+            <td>Order Total:</td>
+            <td style="text-align: right; color: #F97316;">₦{{ order.total|floatformat:0 }}</td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ site_url }}/vendors/orders/{{ order.order_number }}/" class="button">View Order in Dashboard</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>⏰ Action Required:</strong> Please confirm this order in your vendor dashboard as soon as possible.</p>
+</div>
+
+<p>Thank you for being a valued partner!</p>
+
+<p>Best regards,<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vendor Dashboard - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Vendor Dashboard</h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Welcome back, {{ user.username }}!</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="{% url 'vendors:restaurant_create' %}"
+                        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                        <span class="material-symbols-outlined">add</span>
+                        Add Restaurant
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Restaurants</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ stats.total_restaurants }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                        <span
+                            class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">restaurant</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Today's Orders</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ stats.today_orders }}</p>
+                    </div>
+                    <div
+                        class="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                        <span
+                            class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">shopping_bag</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Today's Revenue</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">₦{{ stats.today_revenue|floatformat:0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-2xl">payments</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Pending Orders</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ stats.pending_orders }}</p>
+                    </div>
+                    <div
+                        class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                        <span
+                            class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-2xl">schedule</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Revenue Chart -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Revenue (Last 7 Days)</h2>
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Quick Actions</h2>
+                <div class="space-y-3">
+                    <a href="{% url 'vendors:order_dashboard' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">shopping_bag</span>
+                        <span class="text-gray-900 dark:text-white">Manage Orders</span>
+                    </a>
+                    <a href="{% url 'vendors:menu_list' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">restaurant_menu</span>
+                        <span class="text-gray-900 dark:text-white">Manage Menu</span>
+                    </a>
+                    <a href="{% url 'vendors:restaurant_list' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">store</span>
+                        <span class="text-gray-900 dark:text-white">My Restaurants</span>
+                    </a>
+                    <a href="{% url 'vendors:analytics_dashboard' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">analytics</span>
+                        <span class="text-gray-900 dark:text-white">View Analytics</span>
+                    </a>
+                    <a href="{% url 'vendors:manage_reviews' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">rate_review</span>
+                        <span class="text-gray-900 dark:text-white">Customer Reviews</span>
+                    </a>
+                    <a href="{% url 'restaurants:vendor_coupons' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-primary">local_activity</span>
+                        <span class="text-gray-900 dark:text-white">Manage Coupons</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Orders</h2>
+                    <a href="{% url 'vendors:order_dashboard' %}"
+                        class="text-primary hover:text-primary-dark text-sm font-medium">
+                        View All
+                    </a>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Order</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Restaurant</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Customer</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Amount</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Status</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                Time</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for order in recent_orders %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="px-6 py-4">
+                                <a href="{% url 'vendors:order_detail' order.order_number %}"
+                                    class="text-primary hover:underline font-medium">
+                                    #{{ order.order_number }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ order.restaurant.name }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ order.user.username }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">₦{{ order.total|floatformat:0 }}</td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400
+                                    {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400
+                                    {% elif order.status == 'preparing' %}bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400
+                                    {% elif order.status == 'ready' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                                    {% elif order.status == 'delivered' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                                    {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ order.created_at|timesince }} ago</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                No orders yet
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const chartData = {{ chart_data| safe }};
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.map(d => d.date),
+            datasets: [{
+                label: 'Revenue (₦)',
+                data: chartData.map(d => d.revenue),
+                borderColor: '#F97316',
+                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return '₦' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

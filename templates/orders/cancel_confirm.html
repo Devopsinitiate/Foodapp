@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cancel Order - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Warning Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-5xl">warning</span>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Cancel Order?</h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Are you sure you want to cancel this order?
+                </p>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Order Number:</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">#{{ order.order_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Restaurant:</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ order.restaurant.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Total Amount:</span>
+                        <span class="font-semibold text-primary">₦{{ order.total|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 rounded-full text-sm font-semibold">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Refund Information -->
+            {% if order.payment_status == 'paid' %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 mr-3">info</span>
+                    <div>
+                        <p class="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-1">Refund Information</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">
+                            Your payment of ₦{{ order.total|floatformat:0 }} will be refunded to your original payment method within 3-5 business days.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Cancellation Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Reason for Cancellation (Optional)
+                    </label>
+                    <textarea 
+                        name="reason" 
+                        id="reason" 
+                        rows="3" 
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary focus:ring-primary"
+                        placeholder="Let us know why you're cancelling..."
+                    ></textarea>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        This helps us improve our service
+                    </p>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 mr-3">warning</span>
+                        <div>
+                            <p class="text-sm text-yellow-800 dark:text-yellow-200 font-semibold mb-1">Important</p>
+                            <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                                This action cannot be undone. The restaurant will be notified of the cancellation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4">
+                    <button 
+                        type="submit" 
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                    >
+                        Yes, Cancel Order
+                    </button>
+                    <a 
+                        href="{% url 'orders:detail' order.order_number %}" 
+                        class="flex-1 text-center border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-lg transition-colors"
+                    >
+                        Keep Order
+                    </a>
+                </div>
+            </form>
+
+            <!-- Time Limit Notice -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-xs align-middle">schedule</span>
+                    Orders can only be cancelled within 5 minutes of placement
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

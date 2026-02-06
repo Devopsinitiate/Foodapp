@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }} - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Restaurant Header Image -->
+    <div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden rounded-xl min-h-80 mb-8"
+        style="background-image: url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200{% endif %}');">
+    </div>
+
+    <!-- Restaurant Info -->
+    <div
+        class="flex flex-col md:flex-row justify-between gap-6 py-8 px-4 border-b border-gray-200 dark:border-gray-800">
+        <div class="flex flex-col gap-3 flex-1">
+            <div class="flex items-start justify-between gap-4">
+                <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{{ restaurant.name }}</h1>
+                {% if user.is_authenticated %}
+                <button onclick="toggleFavorite({{ restaurant.id }}, this)"
+                    class="flex-shrink-0 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:scale-110 transition-transform favorite-btn"
+                    data-restaurant-id="{{ restaurant.id }}">
+                    <span
+                        class="material-symbols-outlined {% if restaurant in user.favorite_restaurants.all %}text-red-500{% else %}text-gray-400{% endif %} !text-2xl favorite-icon"
+                        style="{% if restaurant in user.favorite_restaurants.all %}font-variation-settings: 'FILL' 1;{% endif %}">favorite</span>
+                </button>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-4 text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                <span>{{ restaurant.cuisine_type }}</span>
+                <span class="text-gray-300 dark:text-gray-700">|</span>
+                <span>${{ restaurant.minimum_order }} min order</span>
+                <span class="text-gray-300 dark:text-gray-700">|</span>
+                <span>Delivery: {{ restaurant.estimated_delivery_time }}-{{ restaurant.estimated_delivery_time|add:15 }} min</span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">{{ restaurant.description }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-x-8 gap-y-6">
+            <div class="flex flex-col gap-2">
+                <p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{{ restaurant.average_rating|floatformat:1 }}</p>
+                <div class="flex gap-0.5 text-primary">
+                    {% for i in "12345" %}
+                    {% if forloop.counter <= restaurant.average_rating %} <span
+                        class="material-symbols-outlined !text-lg" style="font-variation-settings: 'FILL' 1;">
+                        star</span>
+                        {% elif forloop.counter|add:"-1" < restaurant.average_rating %} <span
+                            class="material-symbols-outlined !text-lg">star_half</span>
+                            {% else %}
+                            <span class="material-symbols-outlined !text-lg">star</span>
+                            {% endif %}
+                            {% endfor %}
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">({{ restaurant.total_reviews }}) reviews</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="flex flex-col lg:flex-row gap-8 py-8">
+        <!-- Sticky Menu Filter Bar (Left Column) -->
+        <aside class="w-full lg:w-1/4 lg:sticky top-24 self-start">
+            <h2
+                class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+                Menu</h2>
+            <nav class="flex flex-col gap-1">
+                <a class="px-4 py-3 rounded-lg {% if not request.GET.category %}bg-primary/20 text-primary font-semibold{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium{% endif %}"
+                    href="{% url 'restaurants:detail' restaurant.slug %}">All Items</a>
+                {% for category in menu_categories %}
+                <a class="px-4 py-3 rounded-lg {% if request.GET.category == category.id|stringformat:'s' %}bg-primary/20 text-primary font-semibold{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium{% endif %}"
+                    href="?category={{ category.id }}">{{ category.name }}</a>
+                {% endfor %}
+            </nav>
+        </aside>
+
+        <!-- Menu Items (Right Column) -->
+        <div class="w-full lg:w-3/4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for item in menu_items %}
+                <div
+                    class="flex flex-col bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800">
+                    <div class="h-48 bg-cover bg-center"
+                        style="background-image: url('{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600{% endif %}');">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <div class="flex items-start justify-between gap-2">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ item.name }}</h3>
+                            {% if item.is_vegetarian %}
+                            <span
+                                class="text-green-600 text-xs bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Veg</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 flex-grow line-clamp-2">{{ item.description }}</p>
+
+                        {% if item.is_on_sale %}
+                        <div class="flex items-center gap-2 mt-3">
+                            <p class="text-lg font-black text-primary">${{ item.discounted_price }}</p>
+                            <p class="text-sm text-gray-500 line-through">${{ item.price }}</p>
+                        </div>
+                        {% else %}
+                        <p class="text-lg font-black text-gray-900 dark:text-white mt-3">${{ item.price }}</p>
+                        {% endif %}
+
+                        <button onclick="addToCart({{ item.id }}, '{{ item.name|escapejs }}')"
+                            class="flex items-center justify-center gap-2 cursor-pointer rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal mt-4 hover:bg-primary/90 transition-colors">
+                            <span class="material-symbols-outlined !text-lg">add_shopping_cart</span>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <p class="text-gray-500 dark:text-gray-400">No menu items available</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="border-t border-gray-200 dark:border-gray-800 pt-12 mt-8" id="reviews">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight">Customer Reviews</h2>
+            {% if latest_order %}
+            <a href="{% url 'restaurants:submit_review' order_number=latest_order.order_number %}"
+                class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                Write a Review
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Rating Summary -->
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <!-- Overall Rating -->
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-8 text-center">
+                <div class="text-6xl font-black text-gray-900 dark:text-white mb-2">{{ restaurant.average_rating|floatformat:1 }}</div>
+                <div class="flex justify-center gap-1 text-primary mb-2">
+                    {% for i in "12345" %}
+                    {% if forloop.counter <= restaurant.average_rating %} <span
+                        class="material-symbols-outlined !text-2xl" style="font-variation-settings: 'FILL' 1;">
+                        star</span>
+                        {% elif forloop.counter|add:"-1" < restaurant.average_rating %} <span
+                            class="material-symbols-outlined !text-2xl">star_half</span>
+                            {% else %}
+                            <span class="material-symbols-outlined !text-2xl">star</span>
+                            {% endif %}
+                        {% endfor %}
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Based on {{ restaurant.total_reviews }} review {{ restaurant.total_reviews|pluralize }}</p>
+            </div>
+
+            <!-- Rating Distribution -->
+            <div class="md:col-span-2 space-y-3">
+                {% for rating, data in rating_dist.items reversed %}
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 w-12">{{ rating }} ★</span>
+                    <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary" style="width: {{ data.percent }}%"></div>
+                    </div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 w-12 text-right">{{ data.percent }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        {% if reviews %}
+        <div class="space-y-6">
+            {% for review in reviews %}
+            <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+                <!-- Review Header -->
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                            {{ review.user.get_full_name|default:review.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ review.user.get_full_name|default:review.user.username }}</p>
+                                {% if review.is_verified_purchase %}
+                                <span
+                                    class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs px-2 py-1 rounded-full font-medium">✓
+                                    Verified</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="flex gap-0.5 text-primary">
+                                    {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %} <span
+                                        class="material-symbols-outlined !text-base"
+                                        style="font-variation-settings: 'FILL' 1;">star</span>
+                                        {% else %}
+                                        <span class="material-symbols-outlined !text-base">star</span>
+                                        {% endif %}
+                                        {% endfor %}
+                                </div>
+                                <span class="text-gray-400 dark:text-gray-500 text-sm">{{ review.created_at|timesince }}
+                                    ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Content -->
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{{ review.comment }}</p>
+
+                <!-- Vendor Response -->
+                {% if review.vendor_response %}
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4 border-l-4 border-primary">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-primary !text-lg">store</span>
+                        <p class="font-semibold text-gray-900 dark:text-white text-sm">Response from {{ restaurant.name
+                            }}</p>
+                        <span class="text-gray-400 dark:text-gray-500 text-xs">{{ review.vendor_response_date|timesince
+                            }} ago</span>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.vendor_response }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-12 text-center">
+            <span class="material-symbols-outlined text-gray-400 !text-6xl mb-4">rate_review</span>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Reviews Yet</h3>
+            <p class="text-gray-600 dark:text-gray-400">Be the first to review this restaurant!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function addToCart(itemId, itemName) {
+        fetch('/api/orders/cart/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                menu_item_id: itemId,
+                quantity: 1
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Update cart count
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount && data.total_items) {
+                    cartCount.textContent = data.total_items;
+                }
+
+                // Show success message
+                alert(`${itemName} added to cart!`);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to add item to cart. Please try again.');
+            });
+    }
+
+    function toggleFavorite(restaurantId, button) {
+        if (!button) button = document.querySelector(`.favorite-btn[data-restaurant-id="${restaurantId}"]`);
+        const icon = button.querySelector('.favorite-icon');
+
+        fetch(`/restaurants/${restaurantId}/toggle-favorite/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Toggle heart icon
+                    if (data.is_favorite) {
+                        icon.classList.add('text-red-500');
+                        icon.classList.remove('text-gray-400');
+                        icon.style.fontVariationSettings = "'FILL' 1";
+                    } else {
+                        icon.classList.remove('text-red-500');
+                        icon.classList.add('text-gray-400');
+                        icon.style.fontVariationSettings = "'FILL' 0";
+                    }
+
+                    // Add animation
+                    button.classList.add('scale-125');
+                    setTimeout(() => button.classList.remove('scale-125'), 200);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update favorite. Please try again.');
+            });
+    }
+</script>
+{% endblock %}

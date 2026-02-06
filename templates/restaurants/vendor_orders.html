@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Vendor Orders - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Order Management</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">Manage your restaurant orders</p>
+        </div>
+
+        <!-- Today's Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Today's Orders</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ today_stats.total_orders }}
+                        </p>
+                    </div>
+                    <div class="bg-blue-100 dark:bg-blue-900 rounded-full p-3">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+                        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ today_stats.pending_orders }}</p>
+                    </div>
+                    <div class="bg-yellow-100 dark:bg-yellow-900 rounded-full p-3">
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Revenue Today</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${{ today_stats.total_revenue }}</p>
+                    </div>
+                    <div class="bg-green-100 dark:bg-green-900 rounded-full p-3">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Payment Split</p>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white mt-1">💳 {{ today_stats.paid_orders }} | 💵 {{ today_stats.cod_orders }}</p>
+                    </div>
+                    <div class="bg-purple-100 dark:bg-purple-900 rounded-full p-3">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters  and Search -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow mb-6">
+            <!-- Status Tabs -->
+            <div class="border-b border-gray-200 dark:border-gray-700">
+                <nav class="flex overflow-x-auto" aria-label="Status Filter">
+                    <a href="?status=all{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'all' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        All ({{ status_counts.all }})
+                    </a>
+                    <a href="?status=pending{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'pending' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        Pending ({{ status_counts.pending }})
+                    </a>
+                    <a href="?status=confirmed{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'confirmed' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        Confirmed ({{ status_counts.confirmed }})
+                    </a>
+                    <a href="?status=preparing{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'preparing' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        Preparing ({{ status_counts.preparing }})
+                    </a>
+                    <a href="?status=ready{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'ready' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        Ready ({{ status_counts.ready }})
+                    </a>
+                    <a href="?status=delivered{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap {% if status_filter == 'delivered' %}border-primary text-primary{% else %}border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                        Completed ({{ status_counts.delivered }})
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="p-4">
+                <form method="get" class="flex gap-3">
+                    <input type="hidden" name="status" value="{{ status_filter }}">
+                    <input type="text" name="search" value="{{ search_query }}"
+                        placeholder="Search by order number, customer name..."
+                        class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50">
+                    <button type="submit"
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium">
+                        Search
+                    </button>
+                    {% if search_query %}
+                    <a href="?status={{ status_filter }}"
+                        class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-medium">
+                        Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="space-y-4">
+            {% if orders %}
+            {% for order in orders %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <!-- Order Header -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-4">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                #{{ order.order_number }}
+                            </h3>
+
+                            <!-- Order Status Badge -->
+                            {% if order.status == 'pending' %}
+                            <span
+                                class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ⏳ Pending
+                            </span>
+                            {% elif order.status == 'confirmed' %}
+                            <span
+                                class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ✓ Confirmed
+                            </span>
+                            {% elif order.status == 'preparing' %}
+                            <span
+                                class="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                🍳 Preparing
+                            </span>
+                            {% elif order.status == 'ready' %}
+                            <span
+                                class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ✓ Ready
+                            </span>
+                            {% elif order.status == 'delivered' %}
+                            <span
+                                class="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ✓ Delivered
+                            </span>
+                            {% endif %}
+
+                            <!-- Payment Status Badge -->
+                            {% if order.payment_status == 'paid' %}
+                            <span
+                                class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                💳 Paid
+                            </span>
+                            {% elif order.payment_status == 'cod' %}
+                            <span
+                                class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                💵 Cash on Delivery
+                            </span>
+                            {% elif order.payment_status == 'pending' %}
+                            <span
+                                class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ⏳ Payment Pending
+                            </span>
+                            {% elif order.payment_status == 'failed' %}
+                            <span
+                                class="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                ✗ Payment Failed
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ order.total }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ order.created_at|date:"M d, Y - g:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Customer</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ order.user.get_full_name|default:order.user.username }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.contact_phone }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Delivery Address</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ order.delivery_address }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.delivery_city }}, {{ order.delivery_state }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="mb-4">
+                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Items:</p>
+                        <ul class="space-y-1">
+                            {% for item in order.items.all %}
+                            <li class="text-sm text-gray-600 dark:text-gray-400"> {{ item.quantity }}x {{ item.menu_item.name }} - ${{ item.subtotal }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3">
+                        {% if order.status == 'pending' %}
+                        <button onclick="confirmOrder({{ order.id }}, '{{ order.order_number }}')"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition">
+                            ✓ Confirm Order
+                        </button>
+                        {% elif order.status == 'confirmed' or order.status == 'preparing' %}
+                        <button onclick="markReady({{ order.id }}, '{{ order.order_number }}')"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition">
+                            ✓ Mark as Ready
+                        </button>
+                        {% endif %}
+
+                        <a href="{% url 'orders:detail' order.order_number %}"
+                            class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if orders.has_other_pages %}
+            <div class="flex justify-center mt-8">
+                <nav class="inline-flex rounded-lg shadow">
+                    {% if orders.has_previous %}
+                    <a href="?page={{ orders.previous_page_number }}&status={{ status_filter }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-l-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Previous
+                    </a>
+                    {% endif %}
+
+                    <span class="px-4 py-2 bg-primary text-white border-y border-primary">
+                        Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                    </span>
+
+                    {% if orders.has_next %}
+                    <a href="?page={{ orders.next_page_number }}&status={{ status_filter }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Next
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No orders found</h3>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {% if search_query %}
+                    No orders match your search criteria.
+                    {% else %}
+                    You don't have any {{ status_filter }} orders yet.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmOrder(orderId, orderNumber) {
+        if (!confirm(`Confirm order #${orderNumber}? This will assign a driver.`)) {
+            return;
+        }
+
+        fetch(`/restaurants/vendor/orders/${orderId}/confirm/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to confirm order');
+            });
+    }
+
+    function markReady(orderId, orderNumber) {
+        if (!confirm(`Mark order #${orderNumber} as ready for pickup?`)) {
+            return;
+        }
+
+        fetch(`/restaurants/vendor/orders/${orderId}/mark-ready/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to mark order as ready');
+            });
+    }
+</script>
+{% endblock %}

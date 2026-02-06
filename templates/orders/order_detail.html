@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }} - EmpressDish{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'orders:list' %}"
+            class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <div>
+            <h1 class="text-gray-900 dark:text-white text-3xl font-black leading-tight">Order #{{ order.order_number }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">Placed on {{ order.created_at|date:"M d, Y g:i A" }}</p>
+        </div>
+    </div>
+
+    <!-- Order Status Card -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Order Status</h2>
+            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                {% if order.status == 'delivered' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                {% elif order.status == 'out_for_delivery' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400{% endif %}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        {% if order.status != 'delivered' and order.status != 'cancelled' %}
+        <div class="flex gap-3">
+            <a href="{% url 'orders:tracking' order.order_number %}"
+                class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined">location_on</span>
+                <span>Track Order</span>
+            </a>
+            {% if order.can_be_cancelled_by_customer %}
+            <a href="{% url 'orders:cancel' order.order_number %}"
+                class="flex items-center justify-center gap-2 rounded-lg border-2 border-red-500 px-6 py-3 text-base font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                <span class="material-symbols-outlined">cancel</span>
+                <span>Cancel</span>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Restaurant Info -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Restaurant</h2>
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-lg bg-cover bg-center"
+                style="background-image: url('{% if order.restaurant.logo %}{{ order.restaurant.logo.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200{% endif %}');">
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ order.restaurant.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.restaurant.cuisine_type }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.restaurant.phone_number }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Order Items</h2>
+        <div class="space-y-4">
+            {% for item in order.items.all %}
+            <div
+                class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-800 last:border-0">
+                <div class="flex-grow">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.item_name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ item.item_description|truncatewords:15 }}</p>
+                    {% if item.special_instructions %}
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Note: {{ item.special_instructions }}</p>
+                    {% endif %}
+                </div>
+                <div class="text-right ml-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Qty: {{ item.quantity }}</p>
+                    <p class="font-bold text-gray-900 dark:text-white">${{ item.total_price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Delivery Address -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Delivery Address</h2>
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl">location_on</span>
+            <div>
+                <p class="text-gray-900 dark:text-white font-medium">{{ order.full_delivery_address }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ order.contact_phone }}</p>
+                {% if order.delivery_instructions %}
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    <span class="font-semibold">Instructions:</span> {{ order.delivery_instructions }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Payment Summary</h2>
+
+        <div class="space-y-3 mb-4">
+            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                <span>Subtotal</span>
+                <span>${{ order.subtotal }}</span>
+            </div>
+            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                <span>Delivery Fee</span>
+                <span>${{ order.delivery_fee }}</span>
+            </div>
+            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                <span>Tax</span>
+                <span>${{ order.tax }}</span>
+            </div>
+            {% if order.discount > 0 %}
+            <div class="flex justify-between text-green-600 dark:text-green-400">
+                <span>Discount {% if order.coupon_code %}({{ order.coupon_code }}){% endif %}</span>
+                <span>-${{ order.discount }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="border-t border-gray-200 dark:border-gray-800 pt-4 flex justify-between items-center">
+            <span class="text-xl font-bold text-gray-900 dark:text-white">Total</span>
+            <span class="text-2xl font-black text-gray-900 dark:text-white">${{ order.total }}</span>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <div class="flex items-center justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Payment Status</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                    {% if order.payment_status == 'paid' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                    {% elif order.payment_status == 'failed' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                    {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400{% endif %}">
+                    {{ order.get_payment_status_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-3 mt-6">
+        {% if order.status == 'delivered' %}
+        <a href="{% url 'restaurants:detail' order.restaurant.slug %}"
+            class="flex items-center justify-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-6 py-3 text-base font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined">refresh</span>
+            <span>Order Again</span>
+        </a>
+
+        {% if not order.has_review %}
+        <a href="{% url 'restaurants:submit_review' order.order_number %}"
+            class="flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary/90 transition-colors">
+            <span class="material-symbols-outlined">rate_review</span>
+            <span>Write a Review</span>
+        </a>
+        {% else %}
+        <div
+            class="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span class="font-bold">Reviewed</span>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <button onclick="window.print()"
+            class="flex items-center justify-center gap-2 rounded-lg bg-gray-200 dark:bg-gray-800 px-6 py-3 text-base font-bold text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined">print</span>
+            <span>Print Receipt</span>
+        </button>
+
+        {% if order.can_be_cancelled %}
+        <button onclick="cancelOrder()"
+            class="flex items-center justify-center gap-2 rounded-lg bg-red-100 dark:bg-red-900/30 px-6 py-3 text-base font-bold text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+            <span class="material-symbols-outlined">cancel</span>
+            <span>Cancel Order</span>
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // WebSocket connection for real-time order updates
+    const orderWs = new WebSocketManager('/ws/orders/{{ order.id }}/');
+
+    orderWs.on('connected', () => {
+        console.log('Connected to order updates');
+    });
+
+    orderWs.on('delivery_status', (data) => {
+        console.log('Order status update:', data);
+
+        // Show toast notification
+        if (window.Toast) {
+            Toast.info(data.message);
+        }
+
+        // Reload page to show updated status
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    });
+
+    orderWs.on('initial_status', (data) => {
+        console.log('Initial status:', data);
+    });
+
+    orderWs.on('error', (error) => {
+        console.error('WebSocket error:', error);
+    });
+
+    // Connect
+    orderWs.connect();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        orderWs.close();
+    });
+
+    // Cancel order function
+    function cancelOrder() {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+
+        const reason = prompt('Please provide a reason for cancellation:');
+        if (!reason) return;
+
+        fetch(`/api/orders/orders/{{ order.id }}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (window.Toast) {
+                    Toast.success('Order cancelled successfully');
+                }
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (window.Toast) {
+                    Toast.error('Failed to cancel order');
+                }
+            });
+    }
+</script>
+{% endblock %}

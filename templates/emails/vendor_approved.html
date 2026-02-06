@@ -1,0 +1,48 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Vendor Application Approved!{% endblock %}
+
+{% block content %}
+<h2>Congratulations! Your Application is Approved! 🎉</h2>
+
+<p>Hi {{ vendor.first_name|default:vendor.username }},</p>
+
+<p>Great news! Your vendor application for <strong>{{ business_name }}</strong> has been approved!</p>
+
+<div class="success-box">
+    <p style="margin: 0;">
+        <strong>✓ Application Approved</strong><br>
+        You can now start managing your restaurant on EmpressDish!
+    </p>
+</div>
+
+<p>Here's what you can do now:</p>
+<ul style="color: #4b5563; line-height: 1.8;">
+    <li>🏪 Create and manage your restaurant listings</li>
+    <li>🍽️ Add menu items and set prices</li>
+    <li>📦 Receive and manage orders</li>
+    <li>📊 Track your sales and analytics</li>
+    <li>💰 Receive payments directly to your account</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ site_url }}/vendors/dashboard/" class="button">Go to Vendor Dashboard</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>💡 Next Steps:</strong></p>
+    <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+        <li>Set up your restaurant profile</li>
+        <li>Add your menu items</li>
+        <li>Set your business hours</li>
+        <li>Start receiving orders!</li>
+    </ol>
+</div>
+
+<p>Need help getting started? Check out our <a href="{{ site_url }}/vendors/guide/" style="color: #F97316;">Vendor Quick Start Guide</a>.</p>
+
+<p>We're excited to have you as a partner on EmpressDish!</p>
+
+<p>Welcome aboard!<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

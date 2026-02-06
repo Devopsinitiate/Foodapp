@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Documents - EmpressDish Driver{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+        <div class="text-center mb-8">
+            <span class="material-symbols-outlined text-6xl text-primary mb-4">upload_file</span>
+            <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Upload Verification Documents</h1>
+            <p class="text-gray-600 dark:text-gray-400">Please upload clear photos of your documents</p>
+        </div>
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Driver License -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span class="material-symbols-outlined text-primary mr-2">badge</span>
+                    Driver License Photo
+                </h3>
+                <input type="file" name="driver_license_photo" accept="image/*" required class="w-full text-sm text-gray-600 dark:text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary file:text-white
+                    hover:file:bg-primary/90">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Upload a clear photo of your driver's license
+                    (front side)</p>
+            </div>
+
+            <!-- Vehicle Registration -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span class="material-symbols-outlined text-primary mr-2">directions_car</span>
+                    Vehicle Registration
+                </h3>
+                <input type="file" name="vehicle_registration" accept="image/*" required class="w-full text-sm text-gray-600 dark:text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary file:text-white
+                    hover:file:bg-primary/90">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Upload your vehicle registration document</p>
+            </div>
+
+            <!-- Insurance Certificate -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span class="material-symbols-outlined text-primary mr-2">verified_user</span>
+                    Insurance Certificate
+                </h3>
+                <input type="file" name="insurance_certificate" accept="image/*" required class="w-full text-sm text-gray-600 dark:text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary file:text-white
+                    hover:file:bg-primary/90">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Upload a valid insurance certificate</p>
+            </div>
+
+            <!-- Profile Photo (Optional) -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span class="material-symbols-outlined text-primary mr-2">account_circle</span>
+                    Profile Photo <span class="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                </h3>
+                <input type="file" name="profile_photo" accept="image/*" class="w-full text-sm text-gray-600 dark:text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary file:text-white
+                    hover:file:bg-primary/90">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Upload a professional photo for your driver
+                    profile</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined mr-2">cloud_upload</span>
+                Upload Documents
+            </button>
+        </form>
+
+        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p class="text-sm text-blue-800 dark:text-blue-300">
+                <span class="material-symbols-outlined text-sm mr-1">info</span>
+                Your documents will be reviewed within 24-48 hours. You'll receive an email once approved.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

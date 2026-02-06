@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Available Deliveries - Driver{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <a href="{% url 'delivery:driver_dashboard' %}"
+                    class="text-primary hover:underline flex items-center gap-1">
+                    <span class="material-symbols-outlined !text-lg">arrow_back</span>
+                    Back to Dashboard
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Available Deliveries</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Accept deliveries to start earning</p>
+        </div>
+
+        <!-- Deliveries List -->
+        {% if deliveries %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for delivery in deliveries %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">local_shipping</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">Order #{{ delivery.order.order_number }}
+                            </p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ delivery.created_at|timesince }} ago
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Restaurant Info -->
+                <div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pickup</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ delivery.order.restaurant.name }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ delivery.order.restaurant.address }}</p>
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Drop off</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{
+                        delivery.order.user.get_full_name|default:delivery.order.user.username }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ delivery.order.delivery_address }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ delivery.order.delivery_city }}, {{
+                        delivery.order.delivery_state }}</p>
+                </div>
+
+                <!-- Delivery Details -->
+                <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="text-center flex-1">
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Distance</p>
+                        <p class="font-bold text-gray-900 dark:text-white">
+                            {% if delivery.distance_km %}
+                            {{ delivery.distance_km }} km
+                            {% else %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="w-px h-10 bg-gray-300 dark:bg-gray-600"></div>
+                    <div class="text-center flex-1">
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Earnings</p>
+                        <p class="font-bold text-green-600 dark:text-green-400 text-lg">${{ delivery.order.delivery_fee
+                            }}</p>
+                    </div>
+                    <div class="w-px h-10 bg-gray-300 dark:bg-gray-600"></div>
+                    <div class="text-center flex-1">
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Items</p>
+                        <p class="font-bold text-gray-900 dark:text-white">{{ delivery.order.items.count }}</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <form method="post" action="{% url 'delivery:accept_delivery' delivery.id %}" class="flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="flex-1 bg-primary text-white px-4 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined !text-lg">check_circle</span>
+                        Accept
+                    </button>
+                    <button type="button" onclick="this.closest('.bg-white, .dark\\:bg-gray-800').style.display='none'"
+                        class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+            <div
+                class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-gray-400 !text-4xl">inventory_2</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Available Deliveries</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Check back soon for new delivery opportunities</p>
+            <a href="{% url 'delivery:driver_dashboard' %}"
+                class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                Back to Dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Order Cancelled - #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<h2>Order Cancelled</h2>
+
+<p>Hi {{ user.first_name|default:user.username }},</p>
+
+<p>Your order from <strong>{{ order.restaurant.name }}</strong> has been cancelled.</p>
+
+<div class="info-box">
+    <p style="margin: 0;">
+        <strong>Order #{{ order.order_number }}</strong><br>
+        Cancelled: {{ order.updated_at|date:"F d, Y H:i" }}
+    </p>
+</div>
+
+{% if order.cancellation_reason %}
+<p><strong>Reason:</strong> {{ order.cancellation_reason }}</p>
+{% endif %}
+
+{% if order.payment_status == 'paid' %}
+<div class="success-box">
+    <p style="margin: 0;">
+        <strong>💰 Refund Processing</strong><br>
+        Your payment of ₦{{ order.total|floatformat:0 }} will be refunded within 3-5 business days.
+    </p>
+</div>
+{% endif %}
+
+<div class="order-details">
+    <h3 style="margin-top: 0; color: #F97316;">Cancelled Order Details</h3>
+    <table>
+        <tr>
+            <td>Restaurant:</td>
+            <td>{{ order.restaurant.name }}</td>
+        </tr>
+        <tr>
+            <td>Order Date:</td>
+            <td>{{ order.created_at|date:"F d, Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td>Total Amount:</td>
+            <td><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<p>We're sorry this order didn't work out. We hope to serve you again soon!</p>
+
+<div style="text-align: center;">
+    <a href="{{ site_url }}/restaurants/" class="button">Browse Restaurants</a>
+</div>
+
+<p>If you have any questions about this cancellation or your refund, please don't hesitate to contact us.</p>
+
+<p>Best regards,<br>
+<strong>The EmpressDish Team</strong></p>
+{% endblock %}

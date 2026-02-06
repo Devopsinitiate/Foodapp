@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verify Driver - Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 !text-4xl">verified_user</span>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Verify Driver</h1>
+                <p class="text-gray-600 dark:text-gray-400">Confirm verification for this driver</p>
+            </div>
+
+            <!-- Driver Details -->
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Driver Information</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Name:</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ driver.get_full_name|default:driver.username }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Email:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.email }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Phone:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.phone_number|default:"N/A" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Vehicle Type:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.get_vehicle_type_display|default:"N/A" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">License Plate:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.vehicle_plate|default:"N/A" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Joined:</span>
+                        <span class="text-gray-900 dark:text-white">{{ driver.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmation -->
+            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-6">
+                <p class="text-purple-800 dark:text-purple-300 text-sm">
+                    <span class="material-symbols-outlined !text-base align-middle mr-1">info</span>
+                    By verifying this driver, they will be able to go online and accept delivery assignments.
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <form method="post" class="flex gap-4">
+                {% csrf_token %}
+                <button type="submit"
+                    class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                    Verify Driver
+                </button>
+                <a href="{% url 'platform_admin:drivers' %}"
+                    class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium text-center">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
